@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: shiwakrishi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shiwakrishi
+      POSTGRES_PASSWORD: shiwakrishi_password
+      POSTGRES_DB: shiwakrishi
+    ports:
+      - "5433:5432"
+    volumes:
+      - shiwakrishi_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  shiwakrishi_postgres_data:

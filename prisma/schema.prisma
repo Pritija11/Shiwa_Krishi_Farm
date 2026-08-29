@@ -1,0 +1,260 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ====================
+// ENUMS
+// ====================
+
+enum Role {
+  ADMIN
+}
+
+enum Availability {
+  IN_STOCK
+  SEASONAL
+  OUT_OF_STOCK
+}
+
+enum Unit {
+  KG
+  LITRE
+  PIECE
+  DOZEN
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum SubscriptionFrequency {
+  DAILY
+  WEEKLY
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum GalleryCategory {
+  FARM
+  ANIMALS
+  POULTRY
+  GOATS
+  DAIRY
+  VEGETABLES
+  FAMILY
+  OTHER
+}
+
+// ====================
+// ADMIN USER
+// ====================
+
+model User {
+  id       String  @id @default(cuid())
+  name     String
+  email    String  @unique
+  password String
+  role     Role    @default(ADMIN)
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ====================
+// PRODUCT CATEGORY
+// ====================
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ====================
+// PRODUCT
+// ====================
+
+model Product {
+  id          String @id @default(cuid())
+  name        String
+  description String
+
+  price        Decimal      @db.Decimal(10, 2)
+  unit         Unit
+  availability Availability @default(IN_STOCK)
+
+  imageUrl String?
+  isActive Boolean @default(true)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  enquiries Enquiry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([availability])
+  @@index([isActive])
+}
+
+// ====================
+// CUSTOMER ENQUIRY
+// ====================
+
+model Enquiry {
+  id String @id @default(cuid())
+
+  customerName String
+  phone        String
+  email        String?
+
+  quantity Decimal? @db.Decimal(10, 2)
+
+  deliveryAddress String?
+  preferredDate   DateTime?
+
+  message String?
+
+  status EnquiryStatus @default(NEW)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ====================
+// MILK SUBSCRIPTION
+// ====================
+
+model MilkSubscription {
+  id String @id @default(cuid())
+
+  customerName String
+  phone        String
+  email        String?
+
+  deliveryAddress String
+
+  quantity Decimal @db.Decimal(10, 2)
+  unit     Unit    @default(LITRE)
+
+  frequency SubscriptionFrequency
+  startDate DateTime
+
+  message String?
+
+  status SubscriptionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([frequency])
+}
+
+// ====================
+// GALLERY
+// ====================
+
+model GalleryItem {
+  id String @id @default(cuid())
+
+  title       String
+  description String?
+
+  mediaUrl  String
+  mediaType MediaType       @default(IMAGE)
+  category  GalleryCategory @default(FARM)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+}
+
+// ====================
+// WEBSITE SETTINGS
+// ====================
+
+model SiteSettings {
+  id String @id @default(cuid())
+
+  phone    String
+  whatsapp String
+  email    String
+
+  address     String
+  locationUrl String?
+
+  workingHours  String?
+  deliveryAreas String?
+  deliveryDays  String?
+
+  facebookUrl  String?
+  instagramUrl String?
+  tiktokUrl    String?
+
+  updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id String @id @default(cuid())
+
+  name    String
+  phone   String?
+  email   String?
+  subject String?
+  message String
+
+  status ContactMessageStatus @default(NEW)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ContactMessageStatus {
+  NEW
+  READ
+  RESOLVED
+}
