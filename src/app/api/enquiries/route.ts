@@ -1,10 +1,33 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { enquirySchema } from "@/validations/enquiry";
 
 // POST /api/enquiries
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    let body;
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
+
+    // Validate request data
+    const validation = enquirySchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: validation.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
 
     const {
       customerName,
@@ -15,24 +38,19 @@ export async function POST(request: Request) {
       deliveryAddress,
       preferredDate,
       message,
-    } = body;
+    } = validation.data;
 
-    // Validate required fields
-    if (
-      !customerName ||
-      !phone ||
-      !productId ||
-      quantity === undefined ||
-      !deliveryAddress ||
-      !preferredDate
-    ) {
+    // Validate preferred date
+    const parsedDate = new Date(preferredDate);
+
+    if (Number.isNaN(parsedDate.getTime())) {
       return NextResponse.json(
-        { error: "Required fields are missing" },
+        { error: "Invalid preferred date" },
         { status: 400 }
       );
     }
 
-    // Check that the product exists and is available
+    // Check that the product exists and is active
     const product = await prisma.product.findFirst({
       where: {
         id: productId,
@@ -47,6 +65,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check product availability
     if (product.availability === "OUT_OF_STOCK") {
       return NextResponse.json(
         { error: "This product is currently out of stock" },
@@ -54,6 +73,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Create enquiry
     const enquiry = await prisma.enquiry.create({
       data: {
         customerName,
@@ -62,7 +82,7 @@ export async function POST(request: Request) {
         productId,
         quantity,
         deliveryAddress,
-        preferredDate: new Date(preferredDate),
+        preferredDate: parsedDate,
         message: message || null,
       },
       include: {

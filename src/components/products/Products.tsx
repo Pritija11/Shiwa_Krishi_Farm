@@ -3,6 +3,7 @@ import ProductCard from "@/components/products/ProductCard";
 
 const products = [
   {
+    id: "fresh-cow-milk",
     name: "Fresh Cow Milk",
     category: "Dairy",
     description: "Fresh cow milk collected with care from our farm.",
@@ -13,6 +14,7 @@ const products = [
     subscription: true,
   },
   {
+    id: "farm-fresh-eggs",
     name: "Farm Fresh Eggs",
     category: "Poultry",
     description: "Fresh eggs from carefully raised farm poultry.",
@@ -23,6 +25,7 @@ const products = [
     subscription: false,
   },
   {
+    id: "seasonal-vegetables",
     name: "Seasonal Vegetables",
     category: "Vegetables",
     description: "Fresh seasonal vegetables grown at our farm.",
@@ -33,7 +36,6 @@ const products = [
     subscription: false,
   },
 ];
-
 const categories = ["All", "Dairy", "Vegetables", "Poultry", "Meat"];
 
 export default function Products() {

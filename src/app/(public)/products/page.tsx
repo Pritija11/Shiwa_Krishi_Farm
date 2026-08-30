@@ -4,6 +4,7 @@ import ProductGrid, {
   type Product,
 } from "@/components/products/ProductGrid";
 import { prisma } from "@/lib/prisma";
+import { getS3Url } from "@/lib/s3-url";
 
 type ProductsPageProps = {
   searchParams: Promise<{
@@ -56,16 +57,22 @@ export default async function ProductsPage({
     }),
   ]);
 
-  const products: Product[] = productsFromDb.map((product) => ({
-    id: product.id,
-    name: product.name,
-    category: product.category.name,
-    description: product.description,
-    price: Number(product.price),
-    unit: product.unit,
-    image: product.imageUrl ?? "/images/farm-hero-image.jpg",
-    availability: formatAvailability(product.availability),
-  }));
+  const products: Product[] = await Promise.all(
+    productsFromDb.map(async (product) => ({
+      id: product.id,
+      name: product.name,
+      category: product.category.name,
+      description: product.description,
+      price: Number(product.price),
+      unit: product.unit,
+
+      image: product.imageUrl
+        ? await getS3Url(product.imageUrl)
+        : "/images/farm-hero-image.jpg",
+
+      availability: formatAvailability(product.availability),
+    }))
+  );
 
   return (
     <main>

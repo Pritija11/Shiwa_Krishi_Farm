@@ -1,6 +1,63 @@
+
+"use client";
+
 import Link from "next/link";
+import { FormEvent, useState } from "react";
 
 export default function MilkSubscriptionPage() {
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setIsSubmitting(true);
+    setStatus("idle");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    const data = {
+      customerName: formData.get("name"),
+      phone: formData.get("phone"),
+      deliveryAddress: formData.get("address"),
+      frequency: String(formData.get("frequency")).toUpperCase(),
+      quantity: Number(formData.get("quantity")),
+      startDate: formData.get("startDate"),
+      message: formData.get("message") || null,
+    };
+
+    try {
+      const response = await fetch("/api/subscriptions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit subscription");
+      }
+
+      setStatus("success");
+      form.reset();
+
+      setTimeout(() => {
+        setStatus("idle");
+      }, 4000);
+    } catch (error) {
+      console.error("Subscription submission error:", error);
+      setStatus("error");
+
+      setTimeout(() => {
+        setStatus("idle");
+      }, 4000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <main className="bg-[#F8F5ED]">
       {/* Hero */}
@@ -98,7 +155,10 @@ export default function MilkSubscriptionPage() {
             </p>
           </div>
 
-          <form className="mt-10 rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-sm sm:p-10">
+          <form
+            onSubmit={handleSubmit}
+            className="mt-10 rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-sm sm:p-10"
+          >
             <div className="grid gap-6 sm:grid-cols-2">
               {/* Name */}
               <div>
@@ -176,6 +236,7 @@ export default function MilkSubscriptionPage() {
                   <option value="" disabled>
                     Select frequency
                   </option>
+
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
                 </select>
@@ -187,15 +248,17 @@ export default function MilkSubscriptionPage() {
                   htmlFor="quantity"
                   className="text-sm font-medium text-green-950"
                 >
-                  Quantity
+                  Quantity (litres)
                 </label>
 
                 <input
                   id="quantity"
                   name="quantity"
-                  type="text"
+                  type="number"
+                  min="0.1"
+                  step="0.1"
                   required
-                  placeholder="e.g. 1 litre"
+                  placeholder="e.g. 1"
                   className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
                 />
               </div>
@@ -237,11 +300,25 @@ export default function MilkSubscriptionPage() {
               </div>
             </div>
 
+            {/* Status Message */}
+            {status === "success" && (
+              <div className="mt-6 rounded-xl bg-green-50 px-4 py-3 text-center text-sm font-medium text-green-800">
+                Your milk subscription request was sent successfully!
+              </div>
+            )}
+
+            {status === "error" && (
+              <div className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700">
+                Something went wrong. Please try again.
+              </div>
+            )}
+
             <button
               type="submit"
-              className="mt-8 w-full rounded-full bg-green-900 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-green-800"
+              disabled={isSubmitting}
+              className="mt-8 w-full rounded-full bg-green-900 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Request Subscription
+              {isSubmitting ? "Sending..." : "Request Subscription"}
             </button>
 
             <p className="mt-4 text-center text-xs leading-5 text-stone-500">
@@ -278,3 +355,4 @@ export default function MilkSubscriptionPage() {
     </main>
   );
 }
+

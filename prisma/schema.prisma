@@ -137,7 +137,7 @@ model Enquiry {
   phone        String
   email        String?
 
-  quantity Decimal? @db.Decimal(10, 2)
+  quantity Decimal @db.Decimal(10, 2)
 
   deliveryAddress String?
   preferredDate   DateTime?
