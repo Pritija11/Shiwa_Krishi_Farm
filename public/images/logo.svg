@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-label="Shiwa Krishi Tatha Pasupanchi Farm">
+  <defs>
+    <path id="arcTop" d="M50,200 A150,150 0 0 1 350,200"/>
+    <path id="arcBot" d="M58,200 A142,142 0 0 0 342,200"/>
+    <clipPath id="innerClip"><circle cx="200" cy="188" r="86"/></clipPath>
+  </defs>
+
+  <!-- base disc -->
+  <circle cx="200" cy="200" r="196" fill="#2f5d44"/>
+
+  <!-- outer keyline rings -->
+  <circle cx="200" cy="200" r="182" fill="none" stroke="#f4efe1" stroke-width="2.5"/>
+  <circle cx="200" cy="200" r="120" fill="none" stroke="#f4efe1" stroke-width="1.4" opacity=".55"/>
+
+  <!-- inner scene -->
+  <circle cx="200" cy="188" r="86" fill="#f4efe1"/>
+  <g clip-path="url(#innerClip)">
+    <!-- sun -->
+    <circle cx="234" cy="150" r="19" fill="#e2a93f"/>
+    <g stroke="#e2a93f" stroke-width="3" stroke-linecap="round">
+      <line x1="234" y1="118" x2="234" y2="126"/>
+      <line x1="258" y1="126" x2="253" y2="131"/>
+      <line x1="266" y1="150" x2="258" y2="150"/>
+      <line x1="258" y1="174" x2="253" y2="169"/>
+      <line x1="210" y1="126" x2="215" y2="131"/>
+      <line x1="202" y1="150" x2="210" y2="150"/>
+    </g>
+    <!-- mountains -->
+    <path d="M118,214 L176,150 L228,214 Z" fill="#e6e9d6"/>
+    <path d="M118,214 L176,150 L200,190 L162,214 Z" fill="#d7dcc4"/>
+    <path d="M196,214 L242,168 L286,214 Z" fill="#eef0e2"/>
+    <path d="M196,214 L242,168 L262,196 L232,214 Z" fill="#dee2ce"/>
+    <!-- field / river band -->
+    <path d="M110,210 q45,-16 90,-4 t90,-2 v70 H110 Z" fill="#4a6b4a"/>
+    <path d="M110,224 q45,-14 90,-3 t90,-2 v60 H110 Z" fill="#3c5a3c"/>
+    <path d="M110,214 q45,-16 90,-4 t90,-2" fill="none" stroke="#f4efe1" stroke-width="1.4" opacity=".45"/>
+  </g>
+  <circle cx="200" cy="188" r="86" fill="none" stroke="#f4efe1" stroke-width="2.2"/>
+
+  <!-- curved wordmark -->
+  <text fill="#f4efe1" font-family="Georgia, 'Times New Roman', serif" font-size="21" letter-spacing="3.4" font-weight="500">
+    <textPath xlink:href="#arcTop" startOffset="50%" text-anchor="middle">SHIWA KRISHI TATHA</textPath>
+  </text>
+  <text fill="#f4efe1" font-family="Georgia, 'Times New Roman', serif" font-size="21" letter-spacing="3.4" font-weight="500">
+    <textPath xlink:href="#arcBot" startOffset="50%" text-anchor="middle">PASUPANCHI FARM</textPath>
+  </text>
+
+  <!-- side dots -->
+  <circle cx="70" cy="200" r="3.4" fill="#e2a93f"/>
+  <circle cx="330" cy="200" r="3.4" fill="#e2a93f"/>
+</svg>
