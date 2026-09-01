@@ -29,9 +29,9 @@ export default function CategoryFilter({
   }
 
   return (
-    <section className="bg-[#F8F5ED] px-6 pb-10">
+    <section className="bg-[#F8F5ED] px-6 pt-8 pb-10">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           <button
             type="button"
             onClick={() => handleCategoryChange("all")}

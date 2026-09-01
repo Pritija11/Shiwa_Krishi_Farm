@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getS3Url } from "@/lib/s3-url";
 
 type ProductDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -42,19 +43,25 @@ export default async function ProductDetailPage({
 
   const availability = formatAvailability(product.availability);
 
+  // Generate a signed S3 URL for the product image
+  const imageUrl = product.imageUrl
+    ? await getS3Url(product.imageUrl)
+    : null;
+
   return (
     <main className="bg-[#F8F5ED]">
       <section className="px-6 pb-24 pt-36 md:pb-32">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2 md:items-center">
           {/* Product Image */}
           <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem]">
-            {product.imageUrl ? (
+            {imageUrl ? (
               <Image
-                src={product.imageUrl}
+                src={imageUrl}
                 alt={product.name}
                 fill
                 priority
                 className="object-cover"
+                unoptimized
               />
             ) : (
               <div className="flex h-full items-center justify-center bg-[#E7E3D8] text-sm text-stone-500">
