@@ -12,7 +12,10 @@ import {
   Settings,
   ExternalLink,
   FolderOpen,
+  LogOut,
 } from "lucide-react";
+
+import { logoutAdmin } from "@/app/admin/logout/action";
 
 const navigation = [
   {
@@ -25,7 +28,6 @@ const navigation = [
     href: "/admin/categories",
     icon: FolderOpen,
   },
-
   {
     name: "Products",
     href: "/admin/products",
@@ -110,8 +112,9 @@ export default function AdminSidebar() {
           </div>
         </nav>
 
-        {/* View Website */}
+        {/* Bottom Actions */}
         <div className="border-t border-white/10 p-4">
+          {/* View Website */}
           <Link
             href="/"
             target="_blank"
@@ -121,6 +124,17 @@ export default function AdminSidebar() {
             <ExternalLink size={17} strokeWidth={1.8} />
             <span>View Website</span>
           </Link>
+
+          {/* Logout */}
+          <form action={logoutAdmin}>
+            <button
+              type="submit"
+              className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-white/60 transition hover:bg-red-500/10 hover:text-red-300"
+            >
+              <LogOut size={17} strokeWidth={1.8} />
+              <span>Logout</span>
+            </button>
+          </form>
         </div>
 
         {/* Footer */}

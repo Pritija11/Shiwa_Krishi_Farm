@@ -8,6 +8,8 @@ type Category = {
   name: string;
 };
 
+type ValidationFields = Record<string, string[]>;
+
 export default function NewProductPage() {
   const router = useRouter();
 
@@ -31,6 +33,7 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<ValidationFields>({});
 
   // Fetch categories
   useEffect(() => {
@@ -67,6 +70,13 @@ export default function NewProductPage() {
       ...previous,
       [name]: value,
     }));
+
+    setFieldErrors((previous) => ({
+      ...previous,
+      [name]: [],
+    }));
+
+    setError("");
   }
 
   function handleImageChange(
@@ -89,6 +99,7 @@ export default function NewProductPage() {
     }
 
     setError("");
+    setFieldErrors({});
     setSelectedImage(file);
 
     const previewUrl = URL.createObjectURL(file);
@@ -142,6 +153,7 @@ export default function NewProductPage() {
 
     setLoading(true);
     setError("");
+    setFieldErrors({});
 
     try {
       let imageKey = null;
@@ -175,7 +187,14 @@ export default function NewProductPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create product.");
+        if (data.fields) {
+          setFieldErrors(data.fields);
+          setError("Please fix the highlighted fields.");
+        } else {
+          setError(data.error || "Failed to create product.");
+        }
+
+        return;
       }
 
       router.push("/admin/products");
@@ -233,8 +252,18 @@ export default function NewProductPage() {
               onChange={handleChange}
               required
               placeholder="e.g. Fresh Cow Milk"
-              className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
+              className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
+                fieldErrors.name
+                  ? "border-red-400"
+                  : "border-stone-200"
+              }`}
             />
+
+            {fieldErrors.name?.map((message) => (
+              <p key={message} className="mt-1 text-xs text-red-600">
+                {message}
+              </p>
+            ))}
           </div>
 
           {/* Category */}
@@ -253,7 +282,11 @@ export default function NewProductPage() {
               onChange={handleChange}
               required
               disabled={loadingCategories}
-              className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 disabled:opacity-60"
+              className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 disabled:opacity-60 ${
+                fieldErrors.categoryId
+                  ? "border-red-400"
+                  : "border-stone-200"
+              }`}
             >
               <option value="">
                 {loadingCategories
@@ -267,6 +300,12 @@ export default function NewProductPage() {
                 </option>
               ))}
             </select>
+
+            {fieldErrors.categoryId?.map((message) => (
+              <p key={message} className="mt-1 text-xs text-red-600">
+                {message}
+              </p>
+            ))}
           </div>
 
           {/* Price */}
@@ -288,8 +327,18 @@ export default function NewProductPage() {
               onChange={handleChange}
               required
               placeholder="e.g. 120"
-              className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
+              className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
+                fieldErrors.price
+                  ? "border-red-400"
+                  : "border-stone-200"
+              }`}
             />
+
+            {fieldErrors.price?.map((message) => (
+              <p key={message} className="mt-1 text-xs text-red-600">
+                {message}
+              </p>
+            ))}
           </div>
 
           {/* Unit */}
@@ -307,13 +356,23 @@ export default function NewProductPage() {
               value={form.unit}
               onChange={handleChange}
               required
-              className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
+              className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
+                fieldErrors.unit
+                  ? "border-red-400"
+                  : "border-stone-200"
+              }`}
             >
               <option value="KG">Kilogram</option>
               <option value="LITRE">Litre</option>
               <option value="PIECE">Piece</option>
               <option value="DOZEN">Dozen</option>
             </select>
+
+            {fieldErrors.unit?.map((message) => (
+              <p key={message} className="mt-1 text-xs text-red-600">
+                {message}
+              </p>
+            ))}
           </div>
 
           {/* Availability */}
@@ -331,7 +390,11 @@ export default function NewProductPage() {
               value={form.availability}
               onChange={handleChange}
               required
-              className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
+              className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
+                fieldErrors.availability
+                  ? "border-red-400"
+                  : "border-stone-200"
+              }`}
             >
               <option value="IN_STOCK">In Stock</option>
               <option value="SEASONAL">Seasonal</option>
@@ -339,6 +402,12 @@ export default function NewProductPage() {
                 Out of Stock
               </option>
             </select>
+
+            {fieldErrors.availability?.map((message) => (
+              <p key={message} className="mt-1 text-xs text-red-600">
+                {message}
+              </p>
+            ))}
           </div>
 
           {/* Product Image */}
@@ -394,8 +463,18 @@ export default function NewProductPage() {
               required
               rows={5}
               placeholder="Describe the product..."
-              className="mt-2 w-full resize-none rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
+              className={`mt-2 w-full resize-none rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
+                fieldErrors.description
+                  ? "border-red-400"
+                  : "border-stone-200"
+              }`}
             />
+
+            {fieldErrors.description?.map((message) => (
+              <p key={message} className="mt-1 text-xs text-red-600">
+                {message}
+              </p>
+            ))}
           </div>
 
           {/* Active Status */}
@@ -425,7 +504,7 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* Error */}
+        {/* General Error */}
         {error && (
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}

@@ -1,5 +1,5 @@
-
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export default function AdminLayout({
   children,
@@ -11,9 +11,10 @@ export default function AdminLayout({
       <AdminSidebar />
 
       <main className="lg:pl-64">
-        {children}
+        <AdminHeader />
+
+        <div>{children}</div>
       </main>
     </div>
   );
 }
-
