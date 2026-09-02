@@ -45,7 +45,7 @@ const navigation = [
   },
   {
     name: "Contact Messages",
-    href: "/admin/messages",
+    href: "/admin/contact-messages",
     icon: Mail,
   },
   {
@@ -69,7 +69,7 @@ export default function AdminSidebar() {
         {/* Logo */}
         <div className="border-b border-white/10 px-7 py-7">
           <Link href="/admin">
-            <p className="font-[family-name:var(--font-dm-serif)] text-2xl text-white">
+            <p className="text-2xl text-white">
               Shiwa Krishi
             </p>
 

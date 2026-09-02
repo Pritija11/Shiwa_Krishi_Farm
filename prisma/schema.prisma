@@ -240,7 +240,7 @@ model ContactMessage {
   id String @id @default(cuid())
 
   name    String
-  phone   String?
+  phone   String
   email   String?
   subject String?
   message String
