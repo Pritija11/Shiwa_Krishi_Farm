@@ -11,7 +11,11 @@ import {
 import ContactForm from "@/components/contact/ContactForm";
 
 export default async function ContactPage() {
-  const settings = await prisma.siteSettings.findFirst();
+  const settings = await prisma.siteSettings.findUnique({
+    where: {
+      id: "site-settings",
+    },
+  });
 
   if (!settings) {
     return (
@@ -153,17 +157,17 @@ export default async function ContactPage() {
           </div>
 
           {/* Map */}
-          <div className="min-h-[420px] overflow-hidden rounded-[2rem] bg-[#E7E3D8]">
+          <div className="min-h-105 overflow-hidden rounded-4xl bg-[#E7E3D8]">
             {settings.locationUrl ? (
               <iframe
                 src={settings.locationUrl}
                 title="Shiwa Krishi Farm location"
-                className="h-full min-h-[420px] w-full border-0"
+                className="h-full min-h-105 w-full border-0"
                 loading="lazy"
                 allowFullScreen
               />
             ) : (
-              <div className="flex h-full min-h-[420px] items-center justify-center px-8 text-center">
+              <div className="flex h-full min-h-105 items-center justify-center px-8 text-center">
                 <div>
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-900 text-white">
                     <MapPin size={24} strokeWidth={1.8} />
@@ -184,10 +188,10 @@ export default async function ContactPage() {
         </div>
 
         {/* Google Maps Button */}
-        {settings.locationUrl && (
+        {settings.googleMapsUrl && (
           <div className="mx-auto mt-6 max-w-7xl text-right">
             <a
-              href={settings.locationUrl}
+              href={settings.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block rounded-full bg-green-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-green-800"
@@ -202,7 +206,7 @@ export default async function ContactPage() {
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2">
           {/* Working Hours */}
-          <div className="rounded-[2rem] border border-stone-200 bg-white p-8 sm:p-10">
+          <div className="rounded-4xl border border-stone-200 bg-white p-8 sm:p-10">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F6EF] text-green-800">
                 <Clock size={18} strokeWidth={1.8} />
@@ -227,7 +231,7 @@ export default async function ContactPage() {
           </div>
 
           {/* Delivery */}
-          <div className="rounded-[2rem] border border-stone-200 bg-white p-8 sm:p-10">
+          <div className="rounded-4xl border border-stone-200 bg-white p-8 sm:p-10">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F6EF] text-green-800">
                 <Truck size={18} strokeWidth={1.8} />

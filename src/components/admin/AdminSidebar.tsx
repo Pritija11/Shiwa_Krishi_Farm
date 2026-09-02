@@ -55,7 +55,7 @@ const navigation = [
   },
   {
     name: "Site Settings",
-    href: "/admin/settings",
+    href: "/admin/site-settings",
     icon: Settings,
   },
 ];

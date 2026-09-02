@@ -222,8 +222,9 @@ model SiteSettings {
   whatsapp String
   email    String
 
-  address     String
-  locationUrl String?
+  address      String
+  locationUrl  String?
+  googleMapsUrl String?
 
   workingHours  String?
   deliveryAreas String?
@@ -235,7 +236,6 @@ model SiteSettings {
 
   updatedAt DateTime @updatedAt
 }
-
 model ContactMessage {
   id String @id @default(cuid())
 
