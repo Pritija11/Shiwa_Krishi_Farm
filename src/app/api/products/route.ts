@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { productSchema } from "@/validations/product";
 
 // GET /api/products
 export async function GET() {
@@ -32,6 +33,26 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    const result = productSchema.safeParse({
+      ...body,
+      price:
+        typeof body.price === "string"
+          ? Number(body.price)
+          : body.price,
+    });
+
+    if (!result.success) {
+      const errors = result.error.flatten().fieldErrors;
+
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          fields: errors,
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       name,
       description,
@@ -40,11 +61,22 @@ export async function POST(request: Request) {
       availability,
       imageUrl,
       categoryId,
-    } = body;
+    } = result.data;
 
-    if (!name || !description || price === undefined || !unit || !categoryId) {
+    const category = await prisma.category.findUnique({
+      where: {
+        id: categoryId,
+      },
+    });
+
+    if (!category) {
       return NextResponse.json(
-        { error: "Required fields are missing" },
+        {
+          error: "Validation failed",
+          fields: {
+            categoryId: ["Selected category does not exist"],
+          },
+        },
         { status: 400 }
       );
     }
@@ -55,8 +87,8 @@ export async function POST(request: Request) {
         description,
         price,
         unit,
-        availability: availability ?? "IN_STOCK",
-        imageUrl: imageUrl ?? null,
+        availability,
+        imageUrl: imageUrl || null,
         categoryId,
       },
       include: {

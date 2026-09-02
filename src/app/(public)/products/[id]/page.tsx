@@ -112,12 +112,18 @@ export default async function ProductDetailPage({
 
             {/* Actions */}
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={`/order?product=${product.id}`}
-                className="rounded-full bg-green-900 px-7 py-3.5 text-sm font-medium text-white transition hover:bg-green-800"
-              >
-                Enquire / Order
-              </Link>
+              {product.availability !== "OUT_OF_STOCK" ? (
+                <Link
+                  href={`/order?product=${product.id}`}
+                  className="rounded-full bg-green-900 px-7 py-3.5 text-sm font-medium text-white transition hover:bg-green-800"
+                >
+                  Enquire / Order
+                </Link>
+              ) : (
+                <span className="rounded-full bg-stone-200 px-7 py-3.5 text-sm font-medium text-stone-500">
+                  Currently Unavailable
+                </span>
+              )}
 
               {product.category.name.toLowerCase().includes("milk") && (
                 <Link

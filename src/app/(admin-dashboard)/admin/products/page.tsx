@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Plus, Package } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getS3Url } from "@/lib/s3-url";
-import ProductTable from "../../../components/admin/ProductTable";
+import ProductTable from "@/components/admin/ProductTable";
 
 export default async function AdminProductsPage() {
   const [products, categories] = await Promise.all([
