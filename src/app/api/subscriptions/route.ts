@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
 // POST /api/subscriptions
 export async function POST(request: Request) {
@@ -27,14 +28,14 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json(
         { error: "Required fields are missing" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!["DAILY", "WEEKLY"].includes(frequency)) {
       return NextResponse.json(
         { error: "Invalid subscription frequency" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -52,13 +53,23 @@ export async function POST(request: Request) {
       },
     });
 
+    try {
+      await createNotification({
+        title: "New Milk Subscription",
+        message: `${subscription.customerName} requested a ${subscription.frequency.toLowerCase()} milk subscription.`,
+        type: "MILK_SUBSCRIPTION",
+      });
+    } catch (error) {
+      console.error("Failed to create milk subscription notification:", error);
+    }
+
     return NextResponse.json(subscription, { status: 201 });
   } catch (error) {
     console.error("Failed to create milk subscription:", error);
 
     return NextResponse.json(
       { error: "Failed to create milk subscription" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -78,7 +89,7 @@ export async function GET() {
 
     return NextResponse.json(
       { error: "Failed to fetch milk subscriptions" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -118,6 +118,7 @@ export default function NewProductPage() {
       const formData = new FormData();
 
       formData.append("file", selectedImage);
+      formData.append("folder", "products");
 
       const response = await fetch("/api/upload", {
         method: "POST",

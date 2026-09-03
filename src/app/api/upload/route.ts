@@ -39,10 +39,6 @@ function sanitizeFileName(fileName: string) {
 
 export async function POST(request: Request) {
   try {
-    // ---------------------------------------
-    // 1. Authentication & authorization
-    // ---------------------------------------
-
     const session = await auth();
 
     if (session?.user?.role !== "ADMIN") {
@@ -52,14 +48,32 @@ export async function POST(request: Request) {
       );
     }
 
-    // ---------------------------------------
-    // 2. Read multipart form data
-    // ---------------------------------------
-
     const formData = await request.formData();
 
     const file = formData.get("file");
-    const folder = formData.get("folder");
+    const folderValue = formData.get("folder");
+
+    // Make sure folder is actually a string
+    if (typeof folderValue !== "string") {
+      return Response.json(
+        { error: "Upload folder is required." },
+        { status: 400 }
+      );
+    }
+
+    // Remove accidental whitespace
+    const folder = folderValue.trim();
+
+    if (
+      !ALLOWED_FOLDERS.includes(
+        folder as (typeof ALLOWED_FOLDERS)[number]
+      )
+    ) {
+      return Response.json(
+        { error: `Invalid upload folder: ${folder}` },
+        { status: 400 }
+      );
+    }
 
     if (!(file instanceof File)) {
       return Response.json(
@@ -67,22 +81,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    if (
-      typeof folder !== "string" ||
-      !ALLOWED_FOLDERS.includes(
-        folder as (typeof ALLOWED_FOLDERS)[number]
-      )
-    ) {
-      return Response.json(
-        { error: "Invalid upload folder." },
-        { status: 400 }
-      );
-    }
-
-    // ---------------------------------------
-    // 3. Basic file validation
-    // ---------------------------------------
 
     if (file.size === 0) {
       return Response.json(
@@ -100,10 +98,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // ---------------------------------------
-    // 4. Determine media type
-    // ---------------------------------------
-
     const isImage = ALLOWED_IMAGE_TYPES.has(file.type);
     const isVideo = ALLOWED_VIDEO_TYPES.has(file.type);
 
@@ -116,10 +110,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    // ---------------------------------------
-    // 5. Size validation
-    // ---------------------------------------
 
     if (isImage && file.size > MAX_IMAGE_SIZE) {
       return Response.json(
@@ -135,10 +125,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // ---------------------------------------
-    // 6. Sanitize filename
-    // ---------------------------------------
-
     const sanitizedName = sanitizeFileName(file.name);
 
     if (!sanitizedName) {
@@ -148,25 +134,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // ---------------------------------------
-    // 7. Generate unique S3 object key
-    // ---------------------------------------
-
     const uniqueId = crypto.randomUUID();
 
     const fileName = `${uniqueId}-${sanitizedName}.${extension}`;
 
     const key = `${folder}/${fileName}`;
 
-    // ---------------------------------------
-    // 8. Convert file to buffer
-    // ---------------------------------------
-
     const buffer = Buffer.from(await file.arrayBuffer());
-
-    // ---------------------------------------
-    // 9. Upload to S3
-    // ---------------------------------------
 
     await s3.send(
       new PutObjectCommand({
@@ -177,10 +151,6 @@ export async function POST(request: Request) {
         ContentLength: buffer.length,
       })
     );
-
-    // ---------------------------------------
-    // 10. Return S3 object key
-    // ---------------------------------------
 
     return Response.json({
       success: true,

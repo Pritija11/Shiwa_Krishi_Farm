@@ -259,4 +259,27 @@ enum ContactMessageStatus {
   READ
   RESOLVED
 }
+// ====================
+// ADMIN NOTIFICATION
+// ====================
 
+model Notification {
+  id String @id @default(cuid())
+
+  title   String
+  message String
+  type    NotificationType
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  ENQUIRY
+  MILK_SUBSCRIPTION
+  CONTACT_MESSAGE
+}

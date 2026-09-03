@@ -37,10 +37,10 @@ export const productSchema = z.object({
     })
     .default("IN_STOCK"),
 
+  // Stores the S3 object key, not a URL.
   imageUrl: z
     .string()
     .trim()
-    .url("Image URL must be a valid URL")
     .optional()
     .or(z.literal("")),
 
