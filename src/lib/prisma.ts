@@ -1,8 +1,13 @@
+import fs from "fs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
+  ssl: {
+  ca: fs.readFileSync("/etc/ssl/rds/global-bundle.pem"),
+  rejectUnauthorized: true,
+},
 });
 
 const globalForPrisma = globalThis as unknown as {
