@@ -21,7 +21,9 @@ type SiteSettingsInput = {
 // GET /api/site-settings
 export async function GET() {
   try {
-    const settings = await prisma.siteSettings.findFirst();
+    const settings = await prisma.siteSettings.findUnique({
+      where: { id: "site-settings" },
+    });
 
     return NextResponse.json(settings);
   } catch (error) {
