@@ -7,7 +7,7 @@ on:
 
   pull_request:
     branches:
-      - feature/farm-website
+      - main
 
 jobs:
   build:
