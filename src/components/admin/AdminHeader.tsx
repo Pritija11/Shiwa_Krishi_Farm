@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { Bell } from "lucide-react";
 import AdminProfileMenu from "./AdminProfileMenu";
+import NotificationBell from "./NotificationBell";
 
 export default async function AdminHeader() {
   const session = await auth();
@@ -24,16 +24,7 @@ export default async function AdminHeader() {
         {/* Header Actions */}
         <div className="flex items-center gap-2">
           {/* Notifications */}
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl text-green-950/70 transition hover:bg-green-950/5 hover:text-green-950"
-          >
-            <Bell size={20} strokeWidth={1.8} />
-
-            {/* Notification indicator */}
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
-          </button>
+          <NotificationBell />
 
           {/* Profile */}
           <AdminProfileMenu

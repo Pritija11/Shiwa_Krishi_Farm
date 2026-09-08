@@ -128,25 +128,26 @@ export default function EditProductPage() {
   }
 
   async function uploadImage(file: File) {
-    const formData = new FormData();
+  const formData = new FormData();
 
-    formData.append("file", file);
+  formData.append("file", file);
+  formData.append("folder", "products");
 
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        data.error || "Failed to upload image."
-      );
-    }
-
-    return data.key as string;
+  if (!response.ok) {
+    throw new Error(
+      data.error || "Failed to upload image."
+    );
   }
+
+  return data.key as string;
+}
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>

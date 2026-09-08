@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { enquirySchema } from "@/validations/enquiry";
+import { createNotification } from "@/lib/notifications";
 
 // POST /api/enquiries
 export async function POST(request: Request) {
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
     } catch {
       return NextResponse.json(
         { error: "Invalid request body" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
           error: "Validation failed",
           details: validation.error.flatten().fieldErrors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
     if (Number.isNaN(parsedDate.getTime())) {
       return NextResponse.json(
         { error: "Invalid preferred date" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -59,17 +60,14 @@ export async function POST(request: Request) {
     });
 
     if (!product) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     // Check product availability
     if (product.availability === "OUT_OF_STOCK") {
       return NextResponse.json(
         { error: "This product is currently out of stock" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -90,13 +88,23 @@ export async function POST(request: Request) {
       },
     });
 
+    try {
+      await createNotification({
+        title: "New Customer Enquiry",
+        message: `${enquiry.customerName} submitted an enquiry for ${enquiry.product.name}.`,
+        type: "ENQUIRY",
+      });
+    } catch (error) {
+      console.error("Failed to create enquiry notification:", error);
+    }
+
     return NextResponse.json(enquiry, { status: 201 });
   } catch (error) {
     console.error("Failed to create enquiry:", error);
 
     return NextResponse.json(
       { error: "Failed to create enquiry" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -119,7 +127,7 @@ export async function GET() {
 
     return NextResponse.json(
       { error: "Failed to fetch enquiries" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

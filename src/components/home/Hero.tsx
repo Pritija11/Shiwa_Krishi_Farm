@@ -8,7 +8,7 @@ const heroImages = [
   "/images/farm-hero-image.jpg",
   "/images/hero-goats.jpg",
   "/images/hero-veggies.jpg",
-  "/images/hero-dairy.jpg",
+  "/images/hero-dairy.webp",
 ];
 
 export default function Hero() {

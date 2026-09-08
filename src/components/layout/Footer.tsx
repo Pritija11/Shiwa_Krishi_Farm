@@ -1,5 +1,8 @@
+
 import Image from "next/image";
 import Link from "next/link";
+
+import { prisma } from "@/lib/prisma";
 
 const quickLinks = [
   { name: "Home", href: "/" },
@@ -16,7 +19,13 @@ const productLinks = [
   { name: "Organic Vegetables", href: "/products/vegetables" },
 ];
 
-export default function Footer() {
+export default async function Footer() {
+  const settings = await prisma.siteSettings.findUnique({
+    where: {
+      id: "site-settings",
+    },
+  });
+
   return (
     <footer className="bg-[#173A2A] text-white">
       <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
@@ -91,28 +100,28 @@ export default function Footer() {
                 <span className="block text-xs uppercase tracking-wider text-green-200/70">
                   Phone
                 </span>
-                +977 XXX XXX XXXX
+                {settings?.phone || "Not available"}
               </p>
 
               <p>
                 <span className="block text-xs uppercase tracking-wider text-green-200/70">
                   WhatsApp
                 </span>
-                +977 XXX XXX XXXX
+                {settings?.whatsapp || "Not available"}
               </p>
 
               <p>
                 <span className="block text-xs uppercase tracking-wider text-green-200/70">
                   Email
                 </span>
-                hello@shiwa-krishifarm.com
+                {settings?.email || "Not available"}
               </p>
 
               <p>
                 <span className="block text-xs uppercase tracking-wider text-green-200/70">
                   Location
                 </span>
-                Shiwa Krishi Farm, Nepal
+                {settings?.address || "Not available"}
               </p>
             </div>
           </div>
