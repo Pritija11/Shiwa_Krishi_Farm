@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { NotificationType } from "@/generated/prisma/client";
 
@@ -14,6 +15,8 @@ type Notification = {
 };
 
 export default function NotificationBell() {
+  const router = useRouter();
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -75,24 +78,29 @@ export default function NotificationBell() {
       try {
         const response = await fetch("/api/notifications", {
           method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            scope: "displayed",
+          }),
         });
 
         if (!response.ok) {
           throw new Error("Failed to mark notifications as read");
         }
 
-        setNotifications((currentNotifications) =>
-          currentNotifications.map((notification) => ({
-            ...notification,
-            isRead: true,
-          }))
-        );
-
-        setUnreadCount(0);
+        // Fetch the updated notifications and unread count
+        await fetchNotifications();
       } catch (error) {
         console.error("Failed to mark notifications as read:", error);
       }
     }
+  };
+
+  const handleViewAll = () => {
+    setIsOpen(false);
+    router.push("/admin/notifications");
   };
 
   return (
@@ -171,6 +179,7 @@ export default function NotificationBell() {
 
               <button
                 type="button"
+                onClick={handleViewAll}
                 className="w-full px-5 py-4 text-center text-xs font-semibold text-green-900 transition hover:bg-green-900/5"
               >
                 View all notifications
