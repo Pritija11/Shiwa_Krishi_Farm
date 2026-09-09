@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import SubscriptionStatusControl from "./SubscriptionStatusControl";
+import DeleteSubscriptionButton from "./DeleteSubscriptionButton";
 
 type Subscription = {
   id: string;
@@ -238,16 +239,25 @@ export default function SubscriptionTable({
 
                 {/* Action */}
                 <td className="px-5 py-5 text-right">
-                  <Link
-                    href={`/admin/subscriptions/${subscription.id}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50 hover:text-green-950"
-                  >
-                    <Eye
-                      size={16}
-                      strokeWidth={1.8}
-                    />
-                    View
-                  </Link>
+                  <div className="flex items-center justify-end gap-1">
+                    <Link
+                      href={`/admin/subscriptions/${subscription.id}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50 hover:text-green-950"
+                    >
+                      <Eye
+                        size={16}
+                        strokeWidth={1.8}
+                      />
+                      View
+                    </Link>
+
+                    {subscription.status === "CANCELLED" && (
+                      <DeleteSubscriptionButton
+                        subscriptionId={subscription.id}
+                        customerName={subscription.customerName}
+                      />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -329,7 +339,7 @@ export default function SubscriptionTable({
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex items-center justify-end gap-1">
               <Link
                 href={`/admin/subscriptions/${subscription.id}`}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50"
@@ -337,6 +347,13 @@ export default function SubscriptionTable({
                 <Eye size={16} />
                 View details
               </Link>
+
+              {subscription.status === "CANCELLED" && (
+                <DeleteSubscriptionButton
+                  subscriptionId={subscription.id}
+                  customerName={subscription.customerName}
+                />
+              )}
             </div>
           </div>
         ))}

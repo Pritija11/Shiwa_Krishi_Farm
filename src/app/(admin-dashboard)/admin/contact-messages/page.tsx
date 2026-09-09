@@ -74,6 +74,7 @@ export default async function ContactMessagesPage({
     readMessages,
     resolvedMessages,
     messages,
+    filteredTotal,
   ] = await Promise.all([
     prisma.contactMessage.count(),
 
@@ -103,11 +104,11 @@ export default async function ContactMessagesPage({
         createdAt: "desc",
       },
     }),
-  ]);
 
-  const filteredTotal = await prisma.contactMessage.count({
-    where,
-  });
+    prisma.contactMessage.count({
+      where,
+    }),
+  ]);
 
   const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
 
@@ -146,7 +147,7 @@ export default async function ContactMessagesPage({
         </p>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <SummaryCard title="Total Messages" value={totalMessages} />
         <SummaryCard title="New" value={newMessages} />
         <SummaryCard title="Read" value={readMessages} />
@@ -256,6 +257,8 @@ export default async function ContactMessagesPage({
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              basePath="/admin/contact-messages"
+              extraParams={{ search, status }}
             />
           </>
         )}

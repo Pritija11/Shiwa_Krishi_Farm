@@ -2,8 +2,11 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Pencil, Eye, Package } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Search, Pencil, Eye, Package, Archive, ArchiveRestore, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import type { Availability } from "@/generated/prisma/client";
 
 type Product = {
   id: string;
@@ -11,7 +14,7 @@ type Product = {
   description: string;
   price: string;
   unit: string;
-  availability: string;
+  availability: Availability;
   imageUrl: string | null;
   isActive: boolean;
   category: {
@@ -30,16 +33,178 @@ type ProductTableProps = {
   categories: Category[];
 };
 
-const PAGE_SIZE = 10;
+const MOBILE_PAGE_SIZE = 5;
+const DESKTOP_PAGE_SIZE = 10;
 
 export default function ProductTable({
   products,
   categories,
 }: ProductTableProps) {
+  const router = useRouter();
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("ALL");
   const [availability, setAvailability] = useState("ALL");
+  const [status, setStatus] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DESKTOP_PAGE_SIZE);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(
+    null
+  );
+  const [deleteError, setDeleteError] = useState<string | null>(
+    null
+  );
+  const [archiveTarget, setArchiveTarget] = useState<Product | null>(
+    null
+  );
+  const [archiveError, setArchiveError] = useState<string | null>(
+    null
+  );
+
+  // Fewer rows per page on mobile, where each row/card takes more vertical space
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+
+    function applyPageSize(isDesktop: boolean) {
+      setPageSize(isDesktop ? DESKTOP_PAGE_SIZE : MOBILE_PAGE_SIZE);
+      setCurrentPage(1);
+    }
+
+    applyPageSize(mediaQuery.matches);
+
+    function handleChange(event: MediaQueryListEvent) {
+      applyPageSize(event.matches);
+    }
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () =>
+      mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  async function performArchiveToggle(
+    productId: string,
+    isActive: boolean
+  ) {
+    setPendingId(productId);
+
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          isActive: !isActive,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            `Failed to ${isActive ? "archive" : "restore"} product.`
+        );
+      }
+
+      router.refresh();
+      return true;
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to update product status.";
+
+      if (archiveTarget?.id === productId) {
+        setArchiveError(message);
+      } else {
+        window.alert(message);
+      }
+
+      return false;
+    } finally {
+      setPendingId(null);
+    }
+  }
+
+  function openArchiveDialog(product: Product) {
+    setArchiveError(null);
+    setArchiveTarget(product);
+  }
+
+  function closeArchiveDialog() {
+    setArchiveTarget(null);
+    setArchiveError(null);
+  }
+
+  async function confirmArchiveToggle() {
+    if (!archiveTarget) {
+      return;
+    }
+
+    const succeeded = await performArchiveToggle(
+      archiveTarget.id,
+      archiveTarget.isActive
+    );
+
+    if (succeeded) {
+      closeArchiveDialog();
+    }
+  }
+
+  function openDeleteDialog(product: Product) {
+    setDeleteError(null);
+    setDeleteTarget(product);
+  }
+
+  function closeDeleteDialog() {
+    setDeleteTarget(null);
+    setDeleteError(null);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    const productId = deleteTarget.id;
+
+    setPendingId(productId);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete product.");
+      }
+
+      setDeleteTarget(null);
+      router.refresh();
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete product."
+      );
+    } finally {
+      setPendingId(null);
+    }
+  }
+
+  async function archiveFromDeleteDialog() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    await performArchiveToggle(deleteTarget.id, deleteTarget.isActive);
+    closeDeleteDialog();
+  }
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -53,20 +218,30 @@ export default function ProductTable({
       const matchesAvailability =
         availability === "ALL" || product.availability === availability;
 
-      return matchesSearch && matchesCategory && matchesAvailability;
-    });
-  }, [products, search, category, availability]);
+      const matchesStatus =
+        status === "ALL" ||
+        (status === "ACTIVE" && product.isActive) ||
+        (status === "ARCHIVED" && !product.isActive);
 
-  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesAvailability &&
+        matchesStatus
+      );
+    });
+  }, [products, search, category, availability, status]);
+
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
 
   const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const startIndex = (currentPage - 1) * pageSize;
 
     return filteredProducts.slice(
       startIndex,
-      startIndex + PAGE_SIZE
+      startIndex + pageSize
     );
-  }, [filteredProducts, currentPage]);
+  }, [filteredProducts, currentPage, pageSize]);
 
   function handleSearchChange(value: string) {
     setSearch(value);
@@ -83,6 +258,11 @@ export default function ProductTable({
     setCurrentPage(1);
   }
 
+  function handleStatusChange(value: string) {
+    setStatus(value);
+    setCurrentPage(1);
+  }
+
   function goToPage(page: number) {
     if (page < 1 || page > totalPages) return;
 
@@ -92,10 +272,10 @@ export default function ProductTable({
   const startItem =
     filteredProducts.length === 0
       ? 0
-      : (currentPage - 1) * PAGE_SIZE + 1;
+      : (currentPage - 1) * pageSize + 1;
 
   const endItem = Math.min(
-    currentPage * PAGE_SIZE,
+    currentPage * pageSize,
     filteredProducts.length
   );
 
@@ -103,15 +283,20 @@ export default function ProductTable({
     <div className="rounded-2xl border border-stone-200 bg-white shadow-sm">
       {/* Filters */}
       <div className="border-b border-stone-100 p-5">
-        <div className="grid gap-3 md:grid-cols-[1fr_200px_200px]">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_180px_180px_180px]">
           {/* Search */}
-          <div className="relative">
+          <div className="relative sm:col-span-2 lg:col-span-1">
             <Search
               size={17}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
             />
 
+            <label htmlFor="product-search" className="sr-only">
+              Search products
+            </label>
+
             <input
+              id="product-search"
               type="search"
               value={search}
               onChange={(event) =>
@@ -123,7 +308,12 @@ export default function ProductTable({
           </div>
 
           {/* Category */}
+          <label htmlFor="product-category-filter" className="sr-only">
+            Filter by category
+          </label>
+
           <select
+            id="product-category-filter"
             value={category}
             onChange={(event) =>
               handleCategoryChange(event.target.value)
@@ -140,7 +330,15 @@ export default function ProductTable({
           </select>
 
           {/* Availability */}
+          <label
+            htmlFor="product-availability-filter"
+            className="sr-only"
+          >
+            Filter by availability
+          </label>
+
           <select
+            id="product-availability-filter"
             value={availability}
             onChange={(event) =>
               handleAvailabilityChange(event.target.value)
@@ -151,6 +349,24 @@ export default function ProductTable({
             <option value="IN_STOCK">In Stock</option>
             <option value="SEASONAL">Seasonal</option>
             <option value="OUT_OF_STOCK">Out of Stock</option>
+          </select>
+
+          {/* Status */}
+          <label htmlFor="product-status-filter" className="sr-only">
+            Filter by status
+          </label>
+
+          <select
+            id="product-status-filter"
+            value={status}
+            onChange={(event) =>
+              handleStatusChange(event.target.value)
+            }
+            className="rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm text-green-950 outline-none focus:border-green-700"
+          >
+            <option value="ALL">All Status</option>
+            <option value="ACTIVE">Active</option>
+            <option value="ARCHIVED">Archived</option>
           </select>
         </div>
       </div>
@@ -242,7 +458,7 @@ export default function ProductTable({
 
                   {/* Price */}
                   <td className="px-5 py-5 text-sm font-medium text-green-900">
-                    Rs. {Number(product.price).toFixed(2)}
+                    {formatCurrency(product.price)}
                   </td>
 
                   {/* Availability */}
@@ -259,24 +475,13 @@ export default function ProductTable({
 
                   {/* Actions */}
                   <td className="px-5 py-5">
-                    <div className="flex justify-end gap-2">
-                      <Link
-                        href={`/products/${product.id}`}
-                        target="_blank"
-                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:border-green-800 hover:text-green-800"
-                        title="View product"
-                      >
-                        <Eye size={16} />
-                      </Link>
-
-                      <Link
-                        href={`/admin/products/${product.id}/edit`}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:border-green-800 hover:text-green-800"
-                        title="Edit product"
-                      >
-                        <Pencil size={16} />
-                      </Link>
-                    </div>
+                    <ProductActions
+                      product={product}
+                      pendingId={pendingId}
+                      onArchive={openArchiveDialog}
+                      onDelete={openDeleteDialog}
+                      className="flex justify-end gap-2"
+                    />
                   </td>
                 </tr>
               ))}
@@ -313,40 +518,27 @@ export default function ProductTable({
                   </p>
 
                   <p className="mt-2 text-sm font-medium text-green-900">
-                    Rs. {Number(product.price).toFixed(2)} /{" "}
+                    {formatCurrency(product.price)} /{" "}
                     {product.unit.toLowerCase()}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex gap-2">
-                  <AvailabilityBadge
-                    availability={product.availability}
-                  />
+              <div className="mt-4 flex flex-wrap gap-2">
+                <AvailabilityBadge
+                  availability={product.availability}
+                />
 
-                  <StatusBadge isActive={product.isActive} />
-                </div>
-
-                <div className="flex gap-2">
-                  <Link
-                    href={`/products/${product.id}`}
-                    target="_blank"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500"
-                    title="View product"
-                  >
-                    <Eye size={16} />
-                  </Link>
-
-                  <Link
-                    href={`/admin/products/${product.id}/edit`}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500"
-                    title="Edit product"
-                  >
-                    <Pencil size={16} />
-                  </Link>
-                </div>
+                <StatusBadge isActive={product.isActive} />
               </div>
+
+              <ProductActions
+                product={product}
+                pendingId={pendingId}
+                onArchive={openArchiveDialog}
+                onDelete={openDeleteDialog}
+                className="mt-3 flex gap-2"
+              />
             </div>
           ))}
         </div>
@@ -428,22 +620,160 @@ export default function ProductTable({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteTarget && (
+        <ConfirmDialog
+          title={
+            deleteError ? "Can't delete product" : "Delete product"
+          }
+          description={
+            <>
+              Are you sure you want to permanently delete{" "}
+              <span className="font-medium text-green-950">
+                {deleteTarget.name}
+              </span>
+              ? This will also remove its images and cannot be
+              undone.
+            </>
+          }
+          errorMessage={deleteError}
+          onClose={closeDeleteDialog}
+          onConfirm={
+            deleteError ? archiveFromDeleteDialog : confirmDelete
+          }
+          confirmLabel={deleteError ? "Archive Instead" : "Delete"}
+          pendingLabel={deleteError ? "Archiving..." : "Deleting..."}
+          isPending={pendingId === deleteTarget.id}
+          confirmVariant={deleteError ? "primary" : "danger"}
+        />
+      )}
+
+      {/* Archive / Restore Confirmation Dialog */}
+      {archiveTarget && (
+        <ConfirmDialog
+          title={
+            archiveTarget.isActive
+              ? "Archive product"
+              : "Restore product"
+          }
+          description={
+            archiveTarget.isActive ? (
+              <>
+                Are you sure you want to archive{" "}
+                <span className="font-medium text-green-950">
+                  {archiveTarget.name}
+                </span>
+                ? It will be hidden from the website but you can
+                restore it anytime.
+              </>
+            ) : (
+              <>
+                Are you sure you want to restore{" "}
+                <span className="font-medium text-green-950">
+                  {archiveTarget.name}
+                </span>
+                ? It will become visible on the website again.
+              </>
+            )
+          }
+          errorMessage={archiveError}
+          onClose={closeArchiveDialog}
+          onConfirm={archiveError ? undefined : confirmArchiveToggle}
+          confirmLabel={archiveTarget.isActive ? "Archive" : "Restore"}
+          pendingLabel={
+            archiveTarget.isActive ? "Archiving..." : "Restoring..."
+          }
+          isPending={pendingId === archiveTarget.id}
+        />
+      )}
     </div>
   );
+}
+
+function ProductActions({
+  product,
+  pendingId,
+  onArchive,
+  onDelete,
+  className = "flex gap-2",
+}: {
+  product: Product;
+  pendingId: string | null;
+  onArchive: (product: Product) => void;
+  onDelete: (product: Product) => void;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <Link
+        href={`/products/${product.id}`}
+        target="_blank"
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:border-green-800 hover:text-green-800"
+        title="View product"
+        aria-label="View product"
+      >
+        <Eye size={16} />
+      </Link>
+
+      <Link
+        href={`/admin/products/${product.id}/edit`}
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:border-green-800 hover:text-green-800"
+        title="Edit product"
+        aria-label="Edit product"
+      >
+        <Pencil size={16} />
+      </Link>
+
+      <button
+        type="button"
+        onClick={() => onArchive(product)}
+        disabled={pendingId === product.id}
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:border-amber-600 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+        title={
+          product.isActive ? "Archive product" : "Restore product"
+        }
+        aria-label={
+          product.isActive ? "Archive product" : "Restore product"
+        }
+      >
+        {product.isActive ? (
+          <Archive size={16} />
+        ) : (
+          <ArchiveRestore size={16} />
+        )}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onDelete(product)}
+        disabled={pendingId === product.id}
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:border-red-600 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+        title="Delete product"
+        aria-label="Delete product"
+      >
+        <Trash2 size={16} />
+      </button>
+    </div>
+  );
+}
+
+function formatCurrency(value: string | number) {
+  return `Rs. ${Number(value).toFixed(2)}`;
 }
 
 function AvailabilityBadge({
   availability,
 }: {
-  availability: string;
+  availability: Availability;
 }) {
-  const styles = {
+  const styles: Record<Availability, string> = {
     IN_STOCK: "bg-green-50 text-green-700",
     SEASONAL: "bg-amber-50 text-amber-700",
     OUT_OF_STOCK: "bg-red-50 text-red-700",
   };
 
-  const labels = {
+  const labels: Record<Availability, string> = {
     IN_STOCK: "In Stock",
     SEASONAL: "Seasonal",
     OUT_OF_STOCK: "Out of Stock",
@@ -451,11 +781,9 @@ function AvailabilityBadge({
 
   return (
     <span
-      className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
-        styles[availability as keyof typeof styles]
-      }`}
+      className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${styles[availability]}`}
     >
-      {labels[availability as keyof typeof labels] ?? availability}
+      {labels[availability]}
     </span>
   );
 }

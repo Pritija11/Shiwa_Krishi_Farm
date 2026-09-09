@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Eye } from "lucide-react";
+
+import DeleteContactMessageButton from "@/components/admin/DeleteContactMessageButton";
 
 type ContactMessage = {
   id: string;
@@ -114,12 +117,22 @@ export default function ContactMessageTable({
                 </td>
 
                 <td className="px-6 py-4 text-right">
-                  <Link
-                    href={`/admin/contact-messages/${message.id}`}
-                    className="text-sm font-medium text-green-800 transition hover:text-green-950"
-                  >
-                    View
-                  </Link>
+                  <div className="flex items-center justify-end gap-4">
+                    <Link
+                      href={`/admin/contact-messages/${message.id}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-green-800 transition hover:text-green-950"
+                    >
+                      <Eye size={16} strokeWidth={1.8} />
+                      View
+                    </Link>
+
+                    {message.status === "RESOLVED" && (
+                      <DeleteContactMessageButton
+                        messageId={message.id}
+                        customerName={message.name}
+                      />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -174,12 +187,22 @@ export default function ContactMessageTable({
                 </p>
               </div>
 
-              <Link
-                href={`/admin/contact-messages/${message.id}`}
-                className="text-sm font-medium text-green-800 transition hover:text-green-950"
-              >
-                View
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link
+                  href={`/admin/contact-messages/${message.id}`}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-green-800 transition hover:text-green-950"
+                >
+                  <Eye size={16} strokeWidth={1.8} />
+                  View
+                </Link>
+
+                {message.status === "RESOLVED" && (
+                  <DeleteContactMessageButton
+                    messageId={message.id}
+                    customerName={message.name}
+                  />
+                )}
+              </div>
             </div>
           </div>
         ))}

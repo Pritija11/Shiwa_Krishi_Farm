@@ -20,7 +20,7 @@ export default async function AdminProfilePage() {
     .toUpperCase();
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="px-6 py-8 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-3xl">
         {/* Page Header */}
         <div className="mb-8">

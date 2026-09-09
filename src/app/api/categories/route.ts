@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { categorySchema } from "@/validations/category";
 
 // GET /api/categories
 export async function GET() {
@@ -31,16 +34,30 @@ export async function GET() {
 // POST /api/categories
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
-    const { name, slug, description } = body;
+    const result = categorySchema.safeParse(body);
 
-    if (!name || !slug) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Name and slug are required" },
+        {
+          error:
+            result.error.issues[0]?.message || "Validation failed",
+        },
         { status: 400 }
       );
     }
+
+    const { name, slug, description } = result.data;
 
     const existingCategory = await prisma.category.findFirst({
       where: {
@@ -59,7 +76,7 @@ export async function POST(request: Request) {
       data: {
         name,
         slug,
-        description: description ?? null,
+        description: description || null,
       },
     });
 

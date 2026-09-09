@@ -37,12 +37,15 @@ export const productSchema = z.object({
     })
     .default("IN_STOCK"),
 
-  // Stores the S3 object key, not a URL.
-  imageUrl: z
-    .string()
-    .trim()
-    .optional()
-    .or(z.literal("")),
+  images: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(1, "Image key cannot be empty")
+    )
+    .min(1, "At least one product image is required")
+    .max(5, "A product can have a maximum of 5 images"),
 
   categoryId: z
     .string()

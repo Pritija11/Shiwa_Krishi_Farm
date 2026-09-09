@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { getS3Url } from "@/lib/s3-url";
 import ArchiveGalleryButton from "@/components/admin/ArchiveGalleryButton";
+import DeleteGalleryButton from "@/components/admin/DeleteGalleryButton";
 
 type GalleryItem = {
   id: string;
@@ -120,8 +121,16 @@ export default async function GalleryGrid({
 
                 <ArchiveGalleryButton
                   id={item.id}
+                  title={item.title}
                   isActive={item.isActive}
                 />
+
+                {!item.isActive && (
+                  <DeleteGalleryButton
+                    id={item.id}
+                    title={item.title}
+                  />
+                )}
               </div>
             </div>
           </div>

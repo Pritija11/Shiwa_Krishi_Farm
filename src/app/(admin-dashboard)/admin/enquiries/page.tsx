@@ -65,6 +65,20 @@ export default async function EnquiriesPage({
             mode: "insensitive" as const,
           },
         },
+        {
+          message: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          product: {
+            name: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
       ],
     }),
   };
@@ -146,7 +160,7 @@ export default async function EnquiriesPage({
               type="text"
               name="search"
               defaultValue={search}
-              placeholder="Search by customer name or phone..."
+              placeholder="Search by name, phone, product, or message..."
               className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-4 text-sm text-green-950 outline-none transition placeholder:text-stone-400 focus:border-green-800 focus:bg-white"
             />
           </div>
@@ -242,6 +256,8 @@ export default async function EnquiriesPage({
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              basePath="/admin/enquiries"
+              extraParams={{ search, status }}
             />
           </>
         )}

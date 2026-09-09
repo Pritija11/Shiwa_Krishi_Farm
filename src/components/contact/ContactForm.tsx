@@ -1,8 +1,13 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { createWhatsAppUrl } from "@/lib/whatsapp";
 
-export default function ContactForm() {
+type ContactFormProps = {
+  whatsapp: string;
+};
+
+export default function ContactForm({ whatsapp }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -40,9 +45,35 @@ export default function ContactForm() {
         throw new Error(result.error || "Failed to send message");
       }
 
+      const whatsappMessage = [
+        "Hello, I would like to contact Shiwa Krishi Farm.",
+        "",
+        data.subject ? `Subject: ${data.subject}` : "",
+        `Name: ${data.name}`,
+        data.phone ? `Phone: ${data.phone}` : "",
+        data.email ? `Email: ${data.email}` : "",
+        "",
+        `Message: ${data.message}`,
+        "",
+        "Thank you.",
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      const whatsappUrl = createWhatsAppUrl(
+        whatsapp,
+        whatsappMessage
+      );
+
       setSuccess(true);
       form.reset();
+
+      setTimeout(() => {
+        window.location.href = whatsappUrl;
+      }, 1000);
     } catch (error) {
+      console.error("Contact submission error:", error);
+
       setError(
         error instanceof Error
           ? error.message
@@ -162,8 +193,7 @@ export default function ContactForm() {
       {/* Success */}
       {success && (
         <div className="mt-6 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
-          Your message has been sent successfully. We&apos;ll get back to you
-          soon.
+          Your message was saved successfully. Opening WhatsApp...
         </div>
       )}
 
@@ -173,8 +203,13 @@ export default function ContactForm() {
         disabled={isSubmitting}
         className="mt-8 w-full rounded-full bg-green-900 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? "Sending..." : "Send Message"}
+        {isSubmitting ? "Preparing WhatsApp..." : "Contact via WhatsApp"}
       </button>
+
+      <p className="mt-4 text-center text-xs leading-5 text-stone-500">
+        Your message will be saved, then WhatsApp will open with your message
+        ready to send.
+      </p>
     </form>
   );
 }

@@ -44,9 +44,6 @@ export default function SiteSettingsForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    console.log("FORM SUBMITTED");
-    console.log("FORM DATA:", formData);
-
     setIsSaving(true);
     setSuccessMessage("");
     setErrorMessage("");
@@ -61,11 +58,7 @@ export default function SiteSettingsForm({
         body: JSON.stringify(formData),
       });
 
-      console.log("API STATUS:", response.status);
-
       const data = await response.json();
-
-      console.log("API RESPONSE:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to save settings");

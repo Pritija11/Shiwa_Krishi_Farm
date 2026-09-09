@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { productSchema } from "@/validations/product";
 
 // GET /api/products
@@ -11,6 +12,11 @@ export async function GET() {
       },
       include: {
         category: true,
+        images: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -31,6 +37,15 @@ export async function GET() {
 // POST /api/products
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const result = productSchema.safeParse({
@@ -59,9 +74,12 @@ export async function POST(request: Request) {
       price,
       unit,
       availability,
-      imageUrl,
+      images,
       categoryId,
     } = result.data;
+
+    const isActive =
+      typeof body.isActive === "boolean" ? body.isActive : true;
 
     const category = await prisma.category.findUnique({
       where: {
@@ -88,11 +106,24 @@ export async function POST(request: Request) {
         price,
         unit,
         availability,
-        imageUrl: imageUrl || null,
         categoryId,
+        isActive,
+        imageUrl: images[0],
+
+        images: {
+          create: images.map((imageUrl, index) => ({
+            imageUrl,
+            sortOrder: index,
+          })),
+        },
       },
       include: {
         category: true,
+        images: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
       },
     });
 

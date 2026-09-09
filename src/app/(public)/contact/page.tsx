@@ -299,7 +299,7 @@ export default async function ContactPage() {
             </p>
           </div>
 
-          <ContactForm />
+          <ContactForm whatsapp={settings.whatsapp} />
         </div>
       </section>
 

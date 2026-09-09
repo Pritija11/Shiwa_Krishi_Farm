@@ -103,6 +103,7 @@ export default async function SubscriptionsPage({
     pausedSubscriptions,
     cancelledSubscriptions,
     subscriptions,
+    filteredTotal,
   ] = await Promise.all([
     prisma.milkSubscription.count(),
 
@@ -138,11 +139,11 @@ export default async function SubscriptionsPage({
         createdAt: "desc",
       },
     }),
-  ]);
 
-  const filteredTotal = await prisma.milkSubscription.count({
-    where,
-  });
+    prisma.milkSubscription.count({
+      where,
+    }),
+  ]);
 
   const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
 
@@ -192,7 +193,7 @@ export default async function SubscriptionsPage({
       </div>
 
       {/* Summary */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-5">
         <SummaryCard
           title="Total"
           value={totalSubscriptions}
@@ -255,6 +256,8 @@ export default async function SubscriptionsPage({
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              basePath="/admin/subscriptions"
+              extraParams={{ search, status, frequency }}
             />
           </div>
         )}

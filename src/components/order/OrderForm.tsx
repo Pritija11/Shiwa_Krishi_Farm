@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createWhatsAppUrl } from "@/lib/whatsapp";
 import { enquirySchema } from "@/validations/enquiry";
 
 type Product = {
@@ -11,6 +12,7 @@ type Product = {
 type OrderFormProps = {
   products: Product[];
   selectedProduct?: string;
+  whatsapp: string;
 };
 
 type FormErrors = Partial<Record<string, string>>;
@@ -23,6 +25,7 @@ type Toast = {
 export default function OrderForm({
   products,
   selectedProduct = "",
+  whatsapp,
 }: OrderFormProps) {
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
@@ -83,6 +86,7 @@ export default function OrderForm({
     }
 
     try {
+      // Save enquiry first
       const response = await fetch("/api/enquiries", {
         method: "POST",
         headers: {
@@ -94,17 +98,53 @@ export default function OrderForm({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          result.error || "Failed to send enquiry."
-        );
+        throw new Error(result.error || "Failed to send enquiry.");
       }
 
+      // Find selected product name
+      const selectedProductData = products.find(
+        (product) => product.id === validation.data.productId
+      );
+
+      if (!selectedProductData) {
+        throw new Error("Selected product could not be found.");
+      }
+
+      // Build WhatsApp message
+      const whatsappMessage = [
+        `Hello, I would like to order ${selectedProductData.name}.`,
+        "",
+        `Quantity: ${validation.data.quantity}`,
+        "",
+        `Delivery Address: ${validation.data.deliveryAddress}`,
+        `Preferred Date: ${validation.data.preferredDate}`,
+        validation.data.message
+          ? `Additional Message: ${validation.data.message}`
+          : "",
+        "",
+        "Thank you.",
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      // Create WhatsApp URL using reusable helper
+      const whatsappUrl = createWhatsAppUrl(
+        whatsapp,
+        whatsappMessage
+      );
+
+      // Reset form
       form.reset();
 
       showToast(
         "success",
-        "Your enquiry has been sent successfully!"
+        "Your enquiry was saved. Opening WhatsApp..."
       );
+
+      // Give the success message a moment before redirecting
+      setTimeout(() => {
+        window.location.href = whatsappUrl;
+      }, 1000);
     } catch (error) {
       console.error(error);
 
@@ -364,12 +404,12 @@ export default function OrderForm({
           disabled={loading}
           className="mt-8 w-full rounded-full bg-green-900 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? "Sending..." : "Send Enquiry"}
+          {loading ? "Preparing WhatsApp..." : "Order via WhatsApp"}
         </button>
 
         <p className="mt-4 text-center text-xs leading-5 text-stone-500">
-          We&apos;ll contact you to confirm availability, price, and
-          delivery details.
+          Your enquiry will be saved, then WhatsApp will open with your
+          order details ready to send.
         </p>
       </form>
     </>

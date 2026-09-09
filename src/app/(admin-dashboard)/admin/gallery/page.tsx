@@ -171,7 +171,7 @@ export default async function GalleryPage({
       </div>
 
       {/* Summary */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <SummaryCard title="Total Images" value={totalItems} />
         <SummaryCard title="Active" value={activeItems} />
         <SummaryCard title="Archived" value={archivedItems} />
@@ -296,6 +296,8 @@ export default async function GalleryPage({
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              basePath="/admin/gallery"
+              extraParams={{ search, category, status }}
             />
           </>
         )}

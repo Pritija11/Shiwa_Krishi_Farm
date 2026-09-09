@@ -4,15 +4,16 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
-type GalleryCategory =
-  | "FARM"
-  | "ANIMALS"
-  | "POULTRY"
-  | "GOATS"
-  | "DAIRY"
-  | "VEGETABLES"
-  | "FAMILY"
-  | "OTHER";
+import {
+  GALLERY_CATEGORIES,
+  formatGalleryCategory,
+  type GalleryCategory,
+} from "@/lib/gallery-categories";
+import {
+  validateGalleryMediaFile,
+  uploadGalleryMedia,
+  getMediaTypeFromFile,
+} from "@/lib/gallery-media";
 
 type GalleryItem = {
   id: string;
@@ -28,20 +29,6 @@ type GalleryItem = {
 type EditGalleryFormProps = {
   item: GalleryItem;
 };
-
-const categories: GalleryCategory[] = [
-  "FARM",
-  "ANIMALS",
-  "POULTRY",
-  "GOATS",
-  "DAIRY",
-  "VEGETABLES",
-  "FAMILY",
-  "OTHER",
-];
-
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
 
 export default function EditGalleryForm({
   item,
@@ -82,21 +69,10 @@ export default function EditGalleryForm({
 
     setError("");
 
-    const isImage = selectedFile.type.startsWith("image/");
-    const isVideo = selectedFile.type.startsWith("video/");
+    const validationError = validateGalleryMediaFile(selectedFile);
 
-    if (!isImage && !isVideo) {
-      setError("Please select an image or video.");
-      return;
-    }
-
-    if (isImage && selectedFile.size > MAX_IMAGE_SIZE) {
-      setError("Image must be smaller than 5MB.");
-      return;
-    }
-
-    if (isVideo && selectedFile.size > MAX_VIDEO_SIZE) {
-      setError("Video must be smaller than 50MB.");
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -108,7 +84,7 @@ export default function EditGalleryForm({
 
     setFile(selectedFile);
     setPreviewUrl(newPreviewUrl);
-    setPreviewType(isImage ? "IMAGE" : "VIDEO");
+    setPreviewType(getMediaTypeFromFile(selectedFile) as "IMAGE" | "VIDEO");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -132,26 +108,10 @@ export default function EditGalleryForm({
        * upload it first.
        */
       if (file) {
-        const formData = new FormData();
+        const uploaded = await uploadGalleryMedia(file);
 
-        formData.append("file", file);
-        formData.append("folder", "gallery");
-
-        const uploadResponse = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        const uploadData = await uploadResponse.json();
-
-        if (!uploadResponse.ok) {
-          throw new Error(
-            uploadData.error || "Failed to upload media."
-          );
-        }
-
-        mediaUrl = uploadData.key;
-        mediaType = uploadData.mediaType;
+        mediaUrl = uploaded.key;
+        mediaType = uploaded.mediaType;
       }
 
       /*
@@ -283,12 +243,12 @@ export default function EditGalleryForm({
             }
             className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-green-700 focus:ring-2 focus:ring-green-100"
           >
-            {categories.map((categoryOption) => (
+            {GALLERY_CATEGORIES.map((categoryOption) => (
               <option
                 key={categoryOption}
                 value={categoryOption}
               >
-                {formatCategory(categoryOption)}
+                {formatGalleryCategory(categoryOption)}
               </option>
             ))}
           </select>
@@ -375,8 +335,4 @@ export default function EditGalleryForm({
       </div>
     </form>
   );
-}
-
-function formatCategory(category: GalleryCategory) {
-  return category.charAt(0) + category.slice(1).toLowerCase();
 }

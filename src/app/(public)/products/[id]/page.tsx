@@ -125,7 +125,9 @@ export default async function ProductDetailPage({
                 </span>
               )}
 
-              {product.category.name.toLowerCase().includes("milk") && (
+              {product.category.name
+                .toLowerCase()
+                .includes("milk") && (
                 <Link
                   href="/milk-subscription"
                   className="rounded-full border border-green-900/20 px-7 py-3.5 text-sm font-medium text-green-900 transition hover:bg-green-900/5"
