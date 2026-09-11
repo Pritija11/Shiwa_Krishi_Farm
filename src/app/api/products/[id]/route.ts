@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getS3Url } from "@/lib/s3-url";
 
@@ -52,6 +54,19 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     const body = await request.json();

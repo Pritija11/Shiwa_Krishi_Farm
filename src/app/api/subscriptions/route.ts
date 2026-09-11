@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 
@@ -77,6 +79,19 @@ export async function POST(request: Request) {
 // GET /api/subscriptions
 export async function GET() {
   try {
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const subscriptions = await prisma.milkSubscription.findMany({
       orderBy: {
         createdAt: "desc",

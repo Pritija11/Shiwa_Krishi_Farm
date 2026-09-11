@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { enquirySchema } from "@/validations/enquiry";
 import { createNotification } from "@/lib/notifications";
@@ -112,6 +114,19 @@ export async function POST(request: Request) {
 // GET /api/enquiries
 export async function GET() {
   try {
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const enquiries = await prisma.enquiry.findMany({
       include: {
         product: true,

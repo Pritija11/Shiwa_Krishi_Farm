@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/validations/product";
 
@@ -31,6 +33,19 @@ export async function GET() {
 // POST /api/products
 export async function POST(request: Request) {
   try {
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const result = productSchema.safeParse({

@@ -1,9 +1,24 @@
 import { NextResponse } from "next/server";
+
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/notifications
 export async function GET(request: Request) {
   try {
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
 
     const page = Math.max(
@@ -50,6 +65,19 @@ export async function GET(request: Request) {
 // PATCH /api/notifications
 export async function PATCH(request: Request) {
   try {
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { scope } = body;
 
