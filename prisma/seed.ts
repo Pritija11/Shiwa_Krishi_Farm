@@ -6,10 +6,17 @@ async function main() {
   const name = process.env.ADMIN_NAME;
   const phone = process.env.ADMIN_PHONE;
   const password = process.env.ADMIN_PASSWORD;
+  const email = process.env.ADMIN_EMAIL;
 
   if (!name || !phone || !password) {
     throw new Error(
       "ADMIN_NAME, ADMIN_PHONE, and ADMIN_PASSWORD must be set."
+    );
+  }
+
+  if (!email) {
+    console.warn(
+      "ADMIN_EMAIL is not set — the admin account won't have an email on file, so \"Forgot password\" won't be able to send a reset link until one is set."
     );
   }
 
@@ -26,6 +33,7 @@ async function main() {
     update: {
       name,
       password: hashedPassword,
+      email: email || undefined,
       role: "ADMIN",
       isActive: true,
     },
@@ -33,6 +41,7 @@ async function main() {
       name,
       phone,
       password: hashedPassword,
+      email: email || undefined,
       role: "ADMIN",
       isActive: true,
     },

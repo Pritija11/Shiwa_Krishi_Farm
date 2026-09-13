@@ -5,6 +5,12 @@ import type { NextAuthConfig } from "next-auth";
 
 import { prisma } from "@/lib/prisma";
 
+const PUBLIC_ADMIN_ROUTES = [
+  "/admin/login",
+  "/admin/forgot-password",
+  "/admin/reset-password",
+];
+
 export const authConfig = {
   trustHost: true,
 
@@ -98,10 +104,18 @@ export const authConfig = {
     },
 
     authorized({ auth, request }) {
-      const isAdminRoute =
-        request.nextUrl.pathname.startsWith("/admin");
+      const { pathname } = request.nextUrl;
+      const isAdminRoute = pathname.startsWith("/admin");
 
       if (!isAdminRoute) {
+        return true;
+      }
+
+      const isPublicAdminRoute = PUBLIC_ADMIN_ROUTES.some(
+        (route) => pathname === route || pathname.startsWith(`${route}/`)
+      );
+
+      if (isPublicAdminRoute) {
         return true;
       }
 

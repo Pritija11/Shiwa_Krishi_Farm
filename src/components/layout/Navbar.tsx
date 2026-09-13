@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
@@ -14,8 +15,17 @@ const navLinks = [
   { name: "Contact", href: "/contact" },
 ];
 
+function isLinkActive(pathname: string, href: string) {
+  if (href === "/") {
+    return pathname === "/";
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="fixed left-0 top-5 z-50 w-full px-4">
@@ -43,15 +53,24 @@ export default function Navbar() {
           </Link>
           {/* Desktop Navigation */}
           <div className="hidden items-center gap-7 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-sm text-gray-700 transition-colors hover:text-green-700"
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = isLinkActive(pathname, link.href);
+
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`text-sm transition-colors ${
+                    active
+                      ? "font-semibold text-green-800"
+                      : "text-gray-700 hover:text-green-700"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Desktop Order Button */}
@@ -78,16 +97,25 @@ export default function Navbar() {
         {isOpen && (
           <div className="border-t border-gray-100 px-5 pb-5 pt-3 md:hidden">
             <div className="flex flex-col gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="rounded-xl px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-green-50 hover:text-green-700"
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const active = isLinkActive(pathname, link.href);
+
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={`rounded-xl px-4 py-3 text-sm transition-colors ${
+                      active
+                        ? "bg-green-50 font-medium text-green-700"
+                        : "text-gray-700 hover:bg-green-50 hover:text-green-700"
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
 
               <Link
                 href="/order"

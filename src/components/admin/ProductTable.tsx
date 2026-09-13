@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Pencil, Eye, Package, Archive, ArchiveRestore, Trash2 } from "lucide-react";
+import { Search, Pencil, Eye, Package, Archive, ArchiveRestore, Trash2, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import type { Availability } from "@/generated/prisma/client";
@@ -17,6 +17,7 @@ type Product = {
   availability: Availability;
   imageUrl: string | null;
   isActive: boolean;
+  isFeatured: boolean;
   category: {
     id: string;
     name: string;
@@ -440,8 +441,14 @@ export default function ProductTable({
                       )}
 
                       <div>
-                        <p className="text-sm font-medium text-green-950">
+                        <p className="flex items-center gap-1.5 text-sm font-medium text-green-950">
                           {product.name}
+                          {product.isFeatured && (
+                            <Star
+                              size={13}
+                              className="shrink-0 fill-amber-400 text-amber-400"
+                            />
+                          )}
                         </p>
 
                         <p className="mt-1 max-w-xs truncate text-xs text-stone-500">
@@ -509,8 +516,14 @@ export default function ProductTable({
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-green-950">
+                  <p className="flex items-center gap-1.5 text-sm font-medium text-green-950">
                     {product.name}
+                    {product.isFeatured && (
+                      <Star
+                        size={13}
+                        className="shrink-0 fill-amber-400 text-amber-400"
+                      />
+                    )}
                   </p>
 
                   <p className="mt-1 text-xs text-stone-500">

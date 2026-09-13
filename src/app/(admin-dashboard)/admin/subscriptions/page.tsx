@@ -23,7 +23,7 @@ const validStatuses = [
   "CANCELLED",
 ] as const;
 
-const validFrequencies = ["DAILY", "WEEKLY"] as const;
+const validFrequencies = ["DAILY", "WEEKLY", "CUSTOM"] as const;
 
 export default async function SubscriptionsPage({
   searchParams,
@@ -63,7 +63,7 @@ export default async function SubscriptionsPage({
     }),
 
     ...(frequency !== "ALL" && {
-      frequency: frequency as "DAILY" | "WEEKLY",
+      frequency: frequency as "DAILY" | "WEEKLY" | "CUSTOM",
     }),
 
     ...(search && {
@@ -137,6 +137,13 @@ export default async function SubscriptionsPage({
       skip: (currentPage - 1) * PAGE_SIZE,
       orderBy: {
         createdAt: "desc",
+      },
+      include: {
+        product: {
+          select: {
+            name: true,
+          },
+        },
       },
     }),
 

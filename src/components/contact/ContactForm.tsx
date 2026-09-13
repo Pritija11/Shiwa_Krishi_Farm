@@ -1,84 +1,158 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { createWhatsAppUrl } from "@/lib/whatsapp";
+import Link from "next/link";
+import {
+  buildWhatsAppMessage,
+  closeWhatsAppWindow,
+  createWhatsAppUrl,
+  isWhatsAppConfigured,
+  openBlankWhatsAppWindow,
+  redirectToWhatsApp,
+} from "@/lib/whatsapp";
+import { fetchJsonWithTimeout } from "@/lib/fetchJson";
+import { contactSchema } from "@/validations/contact";
 
 type ContactFormProps = {
   whatsapp: string;
 };
 
+type FormErrors = Partial<Record<string, string>>;
+
 export default function ContactForm({ whatsapp }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setIsSubmitting(true);
-    setSuccess(false);
-    setError("");
+    setStatus("idle");
+    setFieldErrors({});
 
     const form = event.currentTarget;
     const formData = new FormData(form);
 
     const data = {
-      name: formData.get("name"),
-      phone: formData.get("phone"),
-      email: formData.get("email"),
-      subject: formData.get("subject"),
-      message: formData.get("message"),
+      name: String(formData.get("name") || ""),
+      phone: String(formData.get("phone") || ""),
+      email: String(formData.get("email") || ""),
+      subject: String(formData.get("subject") || ""),
+      message: String(formData.get("message") || ""),
+      acceptTerms: formData.get("acceptTerms") === "on",
     };
 
+    const validation = contactSchema.safeParse(data);
+
+    if (!validation.success) {
+      const errors: FormErrors = {};
+
+      validation.error.issues.forEach((issue) => {
+        const field = issue.path[0];
+
+        if (typeof field === "string" && !errors[field]) {
+          errors[field] = issue.message;
+        }
+      });
+
+      setFieldErrors(errors);
+      setIsSubmitting(false);
+
+      return;
+    }
+
+    if (!isWhatsAppConfigured(whatsapp)) {
+      setErrorMessage(
+        "WhatsApp is not configured right now. Please try again later or contact us by phone."
+      );
+      setStatus("error");
+      setIsSubmitting(false);
+
+      setTimeout(() => {
+        setStatus("idle");
+      }, 2000);
+
+      return;
+    }
+
+    // Opened synchronously (before any await) so the browser still treats
+    // this as a direct result of the user's click and doesn't block it.
+    const whatsappWindow = openBlankWhatsAppWindow();
+
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetchJsonWithTimeout("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(validation.data),
       });
 
-      const result = await response.json();
+      const result = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to send message");
+        closeWhatsAppWindow(whatsappWindow);
+
+        if (result?.fields) {
+          const errors: FormErrors = {};
+
+          for (const [field, messages] of Object.entries(
+            result.fields as Record<string, string[]>
+          )) {
+            if (Array.isArray(messages) && messages[0]) {
+              errors[field] = messages[0];
+            }
+          }
+
+          setFieldErrors(errors);
+          setIsSubmitting(false);
+
+          return;
+        }
+
+        throw new Error(result?.error || "Failed to send message");
       }
 
-      const whatsappMessage = [
+      const whatsappMessage = buildWhatsAppMessage([
         "Hello, I would like to contact Shiwa Krishi Farm.",
         "",
-        data.subject ? `Subject: ${data.subject}` : "",
-        `Name: ${data.name}`,
-        data.phone ? `Phone: ${data.phone}` : "",
-        data.email ? `Email: ${data.email}` : "",
+        validation.data.subject ? `Subject: ${validation.data.subject}` : "",
+        `Name: ${validation.data.name}`,
+        validation.data.phone ? `Phone: ${validation.data.phone}` : "",
+        validation.data.email ? `Email: ${validation.data.email}` : "",
         "",
-        `Message: ${data.message}`,
+        `Message: ${validation.data.message}`,
         "",
         "Thank you.",
-      ]
-        .filter(Boolean)
-        .join("\n");
+      ]);
 
-      const whatsappUrl = createWhatsAppUrl(
-        whatsapp,
-        whatsappMessage
-      );
+      const whatsappUrl = createWhatsAppUrl(whatsapp, whatsappMessage);
 
-      setSuccess(true);
+      setStatus("success");
       form.reset();
 
       setTimeout(() => {
-        window.location.href = whatsappUrl;
+        redirectToWhatsApp(whatsappWindow, whatsappUrl);
       }, 1000);
+
+      setTimeout(() => {
+        setStatus("idle");
+      }, 2000);
     } catch (error) {
       console.error("Contact submission error:", error);
-
-      setError(
+      closeWhatsAppWindow(whatsappWindow);
+      setErrorMessage(
         error instanceof Error
           ? error.message
           : "Something went wrong. Please try again."
       );
+      setStatus("error");
+
+      setTimeout(() => {
+        setStatus("idle");
+      }, 2000);
     } finally {
       setIsSubmitting(false);
     }
@@ -96,7 +170,7 @@ export default function ContactForm({ whatsapp }: ContactFormProps) {
             htmlFor="name"
             className="text-sm font-medium text-green-950"
           >
-            Full Name
+            Full Name <span className="text-red-600">*</span>
           </label>
 
           <input
@@ -107,6 +181,12 @@ export default function ContactForm({ whatsapp }: ContactFormProps) {
             placeholder="Your name"
             className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
           />
+
+          {fieldErrors.name && (
+            <p className="mt-1.5 text-xs text-red-600">
+              {fieldErrors.name}
+            </p>
+          )}
         </div>
 
         {/* Phone */}
@@ -115,16 +195,23 @@ export default function ContactForm({ whatsapp }: ContactFormProps) {
             htmlFor="phone"
             className="text-sm font-medium text-green-950"
           >
-            Phone Number
+            Phone Number <span className="text-red-600">*</span>
           </label>
 
           <input
             id="phone"
             name="phone"
             type="tel"
+            required
             placeholder="98XXXXXXXX"
             className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
           />
+
+          {fieldErrors.phone && (
+            <p className="mt-1.5 text-xs text-red-600">
+              {fieldErrors.phone}
+            </p>
+          )}
         </div>
 
         {/* Email */}
@@ -143,6 +230,12 @@ export default function ContactForm({ whatsapp }: ContactFormProps) {
             placeholder="you@example.com"
             className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
           />
+
+          {fieldErrors.email && (
+            <p className="mt-1.5 text-xs text-red-600">
+              {fieldErrors.email}
+            </p>
+          )}
         </div>
 
         {/* Subject */}
@@ -161,6 +254,12 @@ export default function ContactForm({ whatsapp }: ContactFormProps) {
             placeholder="How can we help?"
             className="mt-2 w-full rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
           />
+
+          {fieldErrors.subject && (
+            <p className="mt-1.5 text-xs text-red-600">
+              {fieldErrors.subject}
+            </p>
+          )}
         </div>
 
         {/* Message */}
@@ -169,7 +268,7 @@ export default function ContactForm({ whatsapp }: ContactFormProps) {
             htmlFor="message"
             className="text-sm font-medium text-green-950"
           >
-            Message
+            Message <span className="text-red-600">*</span>
           </label>
 
           <textarea
@@ -180,20 +279,64 @@ export default function ContactForm({ whatsapp }: ContactFormProps) {
             placeholder="Tell us how we can help..."
             className="mt-2 w-full resize-none rounded-xl border border-stone-200 bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700"
           />
+
+          {fieldErrors.message && (
+            <p className="mt-1.5 text-xs text-red-600">
+              {fieldErrors.message}
+            </p>
+          )}
         </div>
       </div>
 
+      {/* Terms Agreement */}
+      <div className="mt-6 flex items-start gap-3">
+        <input
+          id="acceptTerms"
+          name="acceptTerms"
+          type="checkbox"
+          required
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-stone-300 accent-green-800"
+        />
+
+        <label
+          htmlFor="acceptTerms"
+          className="text-sm leading-5 text-stone-600"
+        >
+          I have read and agree to the{" "}
+          <Link
+            href="/privacy"
+            className="font-medium text-green-800 underline underline-offset-2 hover:text-green-900"
+          >
+            Privacy Policy
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/terms"
+            className="font-medium text-green-800 underline underline-offset-2 hover:text-green-900"
+          >
+            Terms &amp; Conditions
+          </Link>
+          .
+        </label>
+      </div>
+
+      {fieldErrors.acceptTerms && (
+        <p className="mt-1.5 text-xs text-red-600">
+          {fieldErrors.acceptTerms}
+        </p>
+      )}
+
       {/* Error */}
-      {error && (
+      {status === "error" && (
         <div className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
+          {errorMessage || "Something went wrong. Please try again."}
         </div>
       )}
 
       {/* Success */}
-      {success && (
+      {status === "success" && (
         <div className="mt-6 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
-          Your message was saved successfully. Opening WhatsApp...
+          Your message is submitted successfully. Opening WhatsApp...
         </div>
       )}
 

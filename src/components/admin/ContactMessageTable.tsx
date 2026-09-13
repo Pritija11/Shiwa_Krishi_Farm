@@ -6,7 +6,7 @@ import DeleteContactMessageButton from "@/components/admin/DeleteContactMessageB
 type ContactMessage = {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
   email: string | null;
   subject: string | null;
   message: string;
@@ -78,13 +78,21 @@ export default function ContactMessageTable({
 
                 <td className="px-6 py-4">
                   <div className="space-y-1">
-                    <p className="text-sm text-stone-700">
-                      {message.phone}
-                    </p>
+                    {message.phone && (
+                      <p className="text-sm text-stone-700">
+                        {message.phone}
+                      </p>
+                    )}
 
                     {message.email && (
                       <p className="max-w-[180px] truncate text-xs text-stone-500">
                         {message.email}
+                      </p>
+                    )}
+
+                    {!message.phone && !message.email && (
+                      <p className="text-xs italic text-stone-400">
+                        No contact info
                       </p>
                     )}
                   </div>
@@ -150,9 +158,11 @@ export default function ContactMessageTable({
                   {message.name}
                 </p>
 
-                <p className="mt-1 text-xs text-stone-500">
-                  {message.phone}
-                </p>
+                {message.phone && (
+                  <p className="mt-1 text-xs text-stone-500">
+                    {message.phone}
+                  </p>
+                )}
               </div>
 
               <span

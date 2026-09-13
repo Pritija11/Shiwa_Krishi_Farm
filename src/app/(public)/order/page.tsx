@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import OrderForm from "@/components/order/OrderForm";
+import { createWhatsAppLinkUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
 
 type OrderPageProps = {
   searchParams: Promise<{
@@ -37,7 +38,12 @@ export default async function OrderPage({
       },
     }),
   ]);
-  
+
+  const whatsappUrl =
+    settings?.whatsapp && isWhatsAppConfigured(settings.whatsapp)
+      ? createWhatsAppLinkUrl(settings.whatsapp)
+      : null;
+
   return (
     <main className="bg-[#F8F5ED] px-6 pb-24 pt-36">
       <div className="mx-auto max-w-3xl">
@@ -71,9 +77,9 @@ export default async function OrderPage({
           </p>
 
           <div className="mt-3 flex justify-center gap-3">
-            {settings?.whatsapp && (
+            {whatsappUrl && (
               <Link
-                href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full border border-green-900/20 px-5 py-2.5 text-sm font-medium text-green-900 transition hover:bg-green-900/5"

@@ -1,55 +1,96 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { subscriptionSchema } from "@/validations/subscription";
+import { calculateEndDate } from "@/lib/subscription-duration";
 
 // POST /api/subscriptions
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    const result = subscriptionSchema.safeParse({
+      ...body,
+      quantity:
+        typeof body.quantity === "string"
+          ? Number(body.quantity)
+          : body.quantity,
+    });
+
+    if (!result.success) {
+      const errors = result.error.flatten().fieldErrors;
+
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          fields: errors,
+        },
+        { status: 400 },
+      );
+    }
+
     const {
       customerName,
       phone,
       email,
       deliveryAddress,
+      productId,
       quantity,
       frequency,
+      deliveryDays,
       startDate,
+      duration,
       message,
-    } = body;
+    } = result.data;
 
-    if (
-      !customerName ||
-      !phone ||
-      !deliveryAddress ||
-      quantity === undefined ||
-      !frequency ||
-      !startDate
-    ) {
+    // The chosen product is re-verified against the DB rather than trusted
+    // outright: it must still be an active Dairy-category product at the
+    // moment of submission, regardless of what the client claims.
+    const milkProduct = await prisma.product.findFirst({
+      where: {
+        id: productId,
+        isActive: true,
+        category: {
+          name: "Dairy",
+        },
+      },
+    });
+
+    if (!milkProduct) {
       return NextResponse.json(
-        { error: "Required fields are missing" },
+        {
+          error: "Validation failed",
+          fields: {
+            productId: ["Selected product is not currently available"],
+          },
+        },
         { status: 400 },
       );
     }
 
-    if (!["DAILY", "WEEKLY"].includes(frequency)) {
-      return NextResponse.json(
-        { error: "Invalid subscription frequency" },
-        { status: 400 },
-      );
-    }
+    // Daily deliveries have no specific days; clear any stray values so the
+    // stored data always reflects what the frequency actually means.
+    const resolvedDeliveryDays =
+      frequency === "DAILY" ? [] : deliveryDays;
+
+    const startDateObj = new Date(startDate);
+    const endDate = calculateEndDate(startDateObj, duration);
 
     const subscription = await prisma.milkSubscription.create({
       data: {
         customerName,
         phone,
-        email: email || null,
+        email: email ?? null,
         deliveryAddress,
+        productId: milkProduct.id,
         quantity,
         unit: "LITRE",
         frequency,
-        startDate: new Date(startDate),
-        message: message || null,
+        deliveryDays: resolvedDeliveryDays,
+        startDate: startDateObj,
+        duration,
+        endDate,
+        message: message ?? null,
       },
     });
 
@@ -69,26 +110,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { error: "Failed to create milk subscription" },
-      { status: 500 },
-    );
-  }
-}
-
-// GET /api/subscriptions
-export async function GET() {
-  try {
-    const subscriptions = await prisma.milkSubscription.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return NextResponse.json(subscriptions);
-  } catch (error) {
-    console.error("Failed to fetch milk subscriptions:", error);
-
-    return NextResponse.json(
-      { error: "Failed to fetch milk subscriptions" },
       { status: 500 },
     );
   }

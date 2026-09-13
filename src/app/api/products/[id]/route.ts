@@ -110,6 +110,9 @@ export async function PUT(
     const isActive =
       typeof body.isActive === "boolean" ? body.isActive : true;
 
+    const isFeatured =
+      typeof body.isFeatured === "boolean" ? body.isFeatured : false;
+
     const existingProduct = await prisma.product.findUnique({
       where: {
         id,
@@ -156,6 +159,7 @@ export async function PUT(
         availability,
         categoryId,
         isActive,
+        isFeatured,
         imageUrl: images[0],
 
         images: {

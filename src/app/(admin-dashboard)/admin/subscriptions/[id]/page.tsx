@@ -12,6 +12,10 @@ import {
 } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
+import {
+  formatDeliveryDays,
+  formatDuration,
+} from "@/lib/subscription-duration";
 
 type SubscriptionDetailsPageProps = {
   params: Promise<{
@@ -37,11 +41,19 @@ export default async function SubscriptionDetailsPage({
       quantity: true,
       unit: true,
       frequency: true,
+      deliveryDays: true,
       startDate: true,
+      duration: true,
+      endDate: true,
       message: true,
       status: true,
       createdAt: true,
       updatedAt: true,
+      product: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 
@@ -135,6 +147,11 @@ export default async function SubscriptionDetailsPage({
 
           <div className="grid gap-5 p-6 sm:grid-cols-2">
             <DetailItem
+              label="Product"
+              value={subscription.product?.name ?? "Not specified"}
+            />
+
+            <DetailItem
               label="Quantity"
               value={`${subscription.quantity.toString()} ${formatUnit(
                 subscription.unit
@@ -146,10 +163,29 @@ export default async function SubscriptionDetailsPage({
               value={formatFrequency(subscription.frequency)}
             />
 
+            {subscription.deliveryDays.length > 0 && (
+              <DetailItem
+                label="Delivery Days"
+                value={formatDeliveryDays(subscription.deliveryDays)}
+              />
+            )}
+
             <DetailItem
               label="Start Date"
               value={formatDate(subscription.startDate)}
             />
+
+            <DetailItem
+              label="Duration"
+              value={formatDuration(subscription.duration)}
+            />
+
+            {subscription.endDate && (
+              <DetailItem
+                label="End Date"
+                value={formatDate(subscription.endDate)}
+              />
+            )}
 
             <DetailItem
               label="Status"
@@ -315,9 +351,18 @@ function formatStatus(
 }
 
 function formatFrequency(
-  frequency: "DAILY" | "WEEKLY"
+  frequency: "DAILY" | "WEEKLY" | "CUSTOM"
 ) {
-  return frequency === "DAILY" ? "Daily" : "Weekly";
+  switch (frequency) {
+    case "DAILY":
+      return "Daily";
+
+    case "WEEKLY":
+      return "Weekly";
+
+    case "CUSTOM":
+      return "Custom Days";
+  }
 }
 
 function formatUnit(unit: string) {

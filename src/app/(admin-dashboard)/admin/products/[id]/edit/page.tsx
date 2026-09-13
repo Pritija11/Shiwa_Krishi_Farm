@@ -13,6 +13,7 @@ type ProductResponse = {
   availability: string;
   categoryId: string;
   isActive: boolean;
+  isFeatured: boolean;
   images: { key: string; url: string }[];
 };
 
@@ -94,6 +95,7 @@ export default function EditProductPage() {
             availability: product.availability,
             categoryId: product.categoryId,
             isActive: product.isActive,
+            isFeatured: product.isFeatured,
           }}
           initialImages={product.images}
         />

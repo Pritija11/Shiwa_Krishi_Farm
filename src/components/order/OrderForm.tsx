@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { createWhatsAppUrl } from "@/lib/whatsapp";
+import Link from "next/link";
+import {
+  buildWhatsAppMessage,
+  closeWhatsAppWindow,
+  createWhatsAppUrl,
+  isWhatsAppConfigured,
+  openBlankWhatsAppWindow,
+  redirectToWhatsApp,
+} from "@/lib/whatsapp";
+import { fetchJsonWithTimeout } from "@/lib/fetchJson";
 import { enquirySchema } from "@/validations/enquiry";
 
 type Product = {
@@ -63,6 +72,7 @@ export default function OrderForm({
       deliveryAddress: String(formData.get("address") || ""),
       preferredDate: String(formData.get("preferredDate") || ""),
       message: String(formData.get("message") || ""),
+      acceptTerms: formData.get("acceptTerms") === "on",
     };
 
     // Frontend Zod validation
@@ -85,9 +95,23 @@ export default function OrderForm({
       return;
     }
 
+    if (!isWhatsAppConfigured(whatsapp)) {
+      showToast(
+        "error",
+        "WhatsApp is not configured right now. Please try again later or contact us by phone."
+      );
+      setLoading(false);
+
+      return;
+    }
+
+    // Opened synchronously (before any await) so the browser still treats
+    // this as a direct result of the user's click and doesn't block it.
+    const whatsappWindow = openBlankWhatsAppWindow();
+
     try {
       // Save enquiry first
-      const response = await fetch("/api/enquiries", {
+      const response = await fetchJsonWithTimeout("/api/enquiries", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,7 +135,7 @@ export default function OrderForm({
       }
 
       // Build WhatsApp message
-      const whatsappMessage = [
+      const whatsappMessage = buildWhatsAppMessage([
         `Hello, I would like to order ${selectedProductData.name}.`,
         "",
         `Quantity: ${validation.data.quantity}`,
@@ -123,9 +147,7 @@ export default function OrderForm({
           : "",
         "",
         "Thank you.",
-      ]
-        .filter(Boolean)
-        .join("\n");
+      ]);
 
       // Create WhatsApp URL using reusable helper
       const whatsappUrl = createWhatsAppUrl(
@@ -143,10 +165,11 @@ export default function OrderForm({
 
       // Give the success message a moment before redirecting
       setTimeout(() => {
-        window.location.href = whatsappUrl;
+        redirectToWhatsApp(whatsappWindow, whatsappUrl);
       }, 1000);
     } catch (error) {
       console.error(error);
+      closeWhatsAppWindow(whatsappWindow);
 
       showToast(
         "error",
@@ -397,6 +420,44 @@ export default function OrderForm({
             )}
           </div>
         </div>
+
+        {/* Terms Agreement */}
+        <div className="mt-6 flex items-start gap-3">
+          <input
+            id="acceptTerms"
+            name="acceptTerms"
+            type="checkbox"
+            required
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-stone-300 accent-green-800"
+          />
+
+          <label
+            htmlFor="acceptTerms"
+            className="text-sm leading-5 text-stone-600"
+          >
+            I have read and agree to the{" "}
+            <Link
+              href="/privacy"
+              className="font-medium text-green-800 underline underline-offset-2 hover:text-green-900"
+            >
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/terms"
+              className="font-medium text-green-800 underline underline-offset-2 hover:text-green-900"
+            >
+              Terms &amp; Conditions
+            </Link>
+            .
+          </label>
+        </div>
+
+        {fieldErrors.acceptTerms && (
+          <p className="mt-1.5 text-xs text-red-600">
+            {fieldErrors.acceptTerms}
+          </p>
+        )}
 
         {/* Submit */}
         <button

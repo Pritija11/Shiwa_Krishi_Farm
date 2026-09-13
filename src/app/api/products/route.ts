@@ -81,6 +81,9 @@ export async function POST(request: Request) {
     const isActive =
       typeof body.isActive === "boolean" ? body.isActive : true;
 
+    const isFeatured =
+      typeof body.isFeatured === "boolean" ? body.isFeatured : false;
+
     const category = await prisma.category.findUnique({
       where: {
         id: categoryId,
@@ -108,6 +111,7 @@ export async function POST(request: Request) {
         availability,
         categoryId,
         isActive,
+        isFeatured,
         imageUrl: images[0],
 
         images: {

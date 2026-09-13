@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { loginAdmin } from "@/app/admin/login/action";
 
@@ -38,12 +39,21 @@ export default function AdminLoginForm() {
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="text-sm font-medium text-green-950"
-        >
-          Password
-        </label>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="password"
+            className="text-sm font-medium text-green-950"
+          >
+            Password
+          </label>
+
+          <Link
+            href="/admin/forgot-password"
+            className="text-xs font-medium text-green-800 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <div className="relative mt-2">
           <input

@@ -1,3 +1,5 @@
+import Reveal from "@/components/ui/Reveal";
+
 const values = [
   {
     number: "01",
@@ -27,10 +29,10 @@ const values = [
 
 export default function Values() {
   return (
-    <section className="bg-[#F8F5ED] px-6 py-24 md:py-32">
+    <section className="bg-[#F8F5ED] px-6 py-16 md:py-24">
       <div className="mx-auto max-w-7xl">
         {/* Heading */}
-        <div className="max-w-2xl">
+        <Reveal className="max-w-2xl">
           <div className="flex items-center gap-4">
             <span className="h-px w-10 bg-green-800/20" />
 
@@ -39,7 +41,7 @@ export default function Values() {
             </span>
           </div>
 
-          <h2 className="mt-5 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight sm:text-5xl">
+          <h2 className="mt-5 font-[family-name:var(--font-dm-serif)] text-3xl leading-tight sm:text-4xl md:text-5xl">
             The way we farm matters.
           </h2>
 
@@ -47,10 +49,10 @@ export default function Values() {
             Our work is guided by simple principles that help us build a farm
             our community can trust.
           </p>
-        </div>
+        </Reveal>
 
         {/* Values */}
-        <div className="mt-14 grid overflow-hidden rounded-[2rem] border border-green-900/10 md:grid-cols-4">
+        <Reveal className="mt-14 grid overflow-hidden rounded-[2rem] border border-green-900/10 md:grid-cols-4">
           {values.map((value, index) => (
             <div
               key={value.number}
@@ -73,7 +75,7 @@ export default function Values() {
               </p>
             </div>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

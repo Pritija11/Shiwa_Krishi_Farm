@@ -40,6 +40,7 @@ enum EnquiryStatus {
 enum SubscriptionFrequency {
   DAILY
   WEEKLY
+  CUSTOM
 }
 
 enum SubscriptionStatus {
@@ -47,6 +48,23 @@ enum SubscriptionStatus {
   ACTIVE
   PAUSED
   CANCELLED
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum SubscriptionDuration {
+  ONGOING
+  ONE_MONTH
+  THREE_MONTHS
+  SIX_MONTHS
 }
 
 enum MediaType {
@@ -77,6 +95,9 @@ model User {
   password String
   role     Role   @default(ADMIN)
   isActive Boolean @default(true)
+
+  passwordResetTokenHash String?   @unique
+  passwordResetExpiresAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -111,14 +132,16 @@ model Product {
   unit         Unit
   availability Availability @default(IN_STOCK)
 
-  imageUrl String?
-  isActive Boolean @default(true)
+  imageUrl   String?
+  isActive   Boolean @default(true)
+  isFeatured Boolean @default(false)
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
-  enquiries Enquiry[]
-  images    ProductImage[]
+  enquiries         Enquiry[]
+  images            ProductImage[]
+  milkSubscriptions MilkSubscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -126,6 +149,7 @@ model Product {
   @@index([categoryId])
   @@index([availability])
   @@index([isActive])
+  @@index([isFeatured])
 }
 
 model ProductImage {
@@ -186,11 +210,18 @@ model MilkSubscription {
 
   deliveryAddress String
 
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
   quantity Decimal @db.Decimal(10, 2)
   unit     Unit    @default(LITRE)
 
-  frequency SubscriptionFrequency
+  frequency    SubscriptionFrequency
+  deliveryDays DayOfWeek[]           @default([])
+
   startDate DateTime
+  duration  SubscriptionDuration    @default(ONGOING)
+  endDate   DateTime?
 
   message String?
 
@@ -201,6 +232,7 @@ model MilkSubscription {
 
   @@index([status])
   @@index([frequency])
+  @@index([productId])
 }
 
 // ====================
@@ -255,7 +287,7 @@ model ContactMessage {
   id String @id @default(cuid())
 
   name    String
-  phone   String
+  phone   String?
   email   String?
   subject String?
   message String

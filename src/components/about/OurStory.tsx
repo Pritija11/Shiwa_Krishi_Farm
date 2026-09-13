@@ -1,12 +1,13 @@
 import Image from "next/image";
+import Reveal from "@/components/ui/Reveal";
 
 export default function OurStory() {
   return (
-    <section className="bg-[#F8F5ED] px-6 py-24 md:py-32">
+    <section className="bg-[#F8F5ED] px-6 py-16 md:py-24">
       <div className="mx-auto grid max-w-7xl gap-14 md:grid-cols-2 md:items-center">
-        
+
         {/* Text */}
-        <div>
+        <Reveal>
           <div className="flex items-center gap-4">
             <span className="h-px w-10 bg-green-800/20" />
 
@@ -15,7 +16,7 @@ export default function OurStory() {
             </span>
           </div>
 
-          <h2 className="mt-5 max-w-xl font-[family-name:var(--font-dm-serif)] text-4xl leading-tight sm:text-5xl">
+          <h2 className="mt-5 max-w-xl font-[family-name:var(--font-dm-serif)] text-3xl leading-tight sm:text-4xl md:text-5xl">
             A farm built around care, quality, and community.
           </h2>
 
@@ -37,17 +38,17 @@ export default function OurStory() {
               freshness, and responsible farming.
             </p>
           </div>
-        </div>
+        </Reveal>
 
         {/* Image */}
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem]">
+        <Reveal className="relative aspect-[4/5] overflow-hidden rounded-[2rem]">
           <Image
             src="/images/farm-about.jpg"
             alt="Life at Shiwa Krishi Farm"
             fill
             className="object-cover"
           />
-        </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -98,7 +98,7 @@ export default async function ContactMessageDetailsPage({
               <DetailItem
                 icon={<Phone size={17} strokeWidth={1.7} />}
                 label="Phone"
-                value={message.phone}
+                value={message.phone || "Not provided"}
               />
 
               <DetailItem

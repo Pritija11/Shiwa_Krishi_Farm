@@ -26,6 +26,7 @@ type ProductFormValues = {
   availability: string;
   categoryId: string;
   isActive: boolean;
+  isFeatured: boolean;
 };
 
 type ProductFormProps = {
@@ -43,6 +44,7 @@ const DEFAULT_VALUES: ProductFormValues = {
   availability: "IN_STOCK",
   categoryId: "",
   isActive: true,
+  isFeatured: false,
 };
 
 export default function ProductForm({
@@ -374,6 +376,7 @@ export default function ProductForm({
           images: imageKeys,
           categoryId: form.categoryId,
           isActive: form.isActive,
+          isFeatured: form.isFeatured,
         }),
       });
 
@@ -437,7 +440,7 @@ export default function ProductForm({
               htmlFor="name"
               className="text-sm font-medium text-green-950"
             >
-              Product Name
+              Product Name <span className="text-red-600">*</span>
             </label>
 
             <input
@@ -449,7 +452,7 @@ export default function ProductForm({
               required
               placeholder="e.g. Fresh Cow Milk"
               className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
-                fieldErrors.name
+                fieldErrors.name?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}
@@ -471,7 +474,7 @@ export default function ProductForm({
               htmlFor="categoryId"
               className="text-sm font-medium text-green-950"
             >
-              Category
+              Category <span className="text-red-600">*</span>
             </label>
 
             <select
@@ -482,7 +485,7 @@ export default function ProductForm({
               required
               disabled={loadingCategories}
               className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 disabled:opacity-60 ${
-                fieldErrors.categoryId
+                fieldErrors.categoryId?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}
@@ -519,7 +522,7 @@ export default function ProductForm({
               htmlFor="price"
               className="text-sm font-medium text-green-950"
             >
-              Price
+              Price <span className="text-red-600">*</span>
             </label>
 
             <input
@@ -533,7 +536,7 @@ export default function ProductForm({
               required
               placeholder="e.g. 120"
               className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
-                fieldErrors.price
+                fieldErrors.price?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}
@@ -555,7 +558,7 @@ export default function ProductForm({
               htmlFor="unit"
               className="text-sm font-medium text-green-950"
             >
-              Unit
+              Unit <span className="text-red-600">*</span>
             </label>
 
             <select
@@ -565,7 +568,7 @@ export default function ProductForm({
               onChange={handleChange}
               required
               className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
-                fieldErrors.unit
+                fieldErrors.unit?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}
@@ -592,7 +595,7 @@ export default function ProductForm({
               htmlFor="availability"
               className="text-sm font-medium text-green-950"
             >
-              Availability
+              Availability <span className="text-red-600">*</span>
             </label>
 
             <select
@@ -602,7 +605,7 @@ export default function ProductForm({
               onChange={handleChange}
               required
               className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
-                fieldErrors.availability
+                fieldErrors.availability?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}
@@ -630,7 +633,7 @@ export default function ProductForm({
               htmlFor="images"
               className="text-sm font-medium text-green-950"
             >
-              Product Images
+              Product Images <span className="text-red-600">*</span>
             </label>
 
             <input
@@ -710,7 +713,7 @@ export default function ProductForm({
               htmlFor="description"
               className="text-sm font-medium text-green-950"
             >
-              Description
+              Description <span className="text-red-600">*</span>
             </label>
 
             <textarea
@@ -722,7 +725,7 @@ export default function ProductForm({
               rows={5}
               placeholder="Describe the product..."
               className={`mt-2 w-full resize-none rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
-                fieldErrors.description
+                fieldErrors.description?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}
@@ -762,6 +765,34 @@ export default function ProductForm({
             <p className="mt-1 pl-7 text-xs text-stone-500">
               Active products can be displayed on the public
               website.
+            </p>
+          </div>
+
+          {/* Featured Status */}
+          <div className="sm:col-span-2">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                name="isFeatured"
+                checked={form.isFeatured}
+                onChange={(event) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    isFeatured: event.target.checked,
+                  }))
+                }
+                className="h-4 w-4 rounded border-stone-300 accent-green-900"
+              />
+
+              <span className="text-sm font-medium text-green-950">
+                Feature on homepage
+              </span>
+            </label>
+
+            <p className="mt-1 pl-7 text-xs text-stone-500">
+              Featured products appear in the homepage&apos;s
+              highlighted picks (up to 4). If fewer than 4 products
+              are featured, the newest active products fill the rest.
             </p>
           </div>
         </div>

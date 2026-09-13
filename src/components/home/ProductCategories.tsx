@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import Reveal from "@/components/ui/Reveal";
 
 const categories = [
   {
@@ -11,7 +12,7 @@ const categories = [
   {
     name: "Fresh Dairy",
     description: "Fresh, wholesome milk from our farm.",
-    image: "/images/hero-dairy.jpg",
+    image: "/images/hero-dairy.webp",
     href: "/products?category=dairy",
   },
   {
@@ -30,15 +31,15 @@ const categories = [
 
 export default function ProductCategories() {
   return (
-    <section className="bg-[#F8F5ED] px-6 py-24 md:py-32">
+    <section className="bg-[#F8F5ED] px-6 py-16 md:py-24">
       <div className="mx-auto max-w-7xl">
         {/* Section Heading */}
-        <div className="mb-14 max-w-2xl">
+        <Reveal className="mb-14 max-w-2xl">
           <p className="mb-4 text-sm font-medium uppercase tracking-[0.25em] text-green-700">
             What We Offer
           </p>
 
-          <h2 className="font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-green-950 sm:text-5xl md:text-6xl">
+          <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl leading-tight text-green-950 sm:text-4xl md:text-5xl">
             Naturally grown.
             <span className="block text-green-700">
               Carefully raised.
@@ -49,51 +50,52 @@ export default function ProductCategories() {
             Discover fresh, quality products grown and raised with care at
             Shiwa Krishi Farm.
           </p>
-        </div>
+        </Reveal>
 
         {/* Category Grid */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <Reveal className="grid grid-cols-2 gap-3 sm:gap-5">
           {categories.map((category) => (
             <Link
               key={category.name}
               href={category.href}
-              className="group relative h-[420px] overflow-hidden rounded-3xl"
+              className="group relative aspect-[4/5] overflow-hidden rounded-2xl sm:aspect-[4/3] sm:rounded-3xl lg:aspect-video"
             >
               {/* Image */}
               <Image
                 src={category.image}
                 alt={category.name}
                 fill
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 40vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
 
               {/* Gradient */}
               <div className="absolute inset-0 bg-gradient-to-t from-green-950/85 via-green-950/20 to-transparent" />
 
-              {/* Content */}
-              <div className="absolute inset-x-0 bottom-0 p-7 text-white md:p-9">
-                <span className="mb-3 inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-medium uppercase tracking-wider text-white backdrop-blur-sm">
+              {/* Badge */}
+              <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-[9px] font-medium uppercase tracking-wider text-green-950 shadow-sm sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-[11px]">
                 Farm Fresh
-                </span>
+              </span>
 
-                <h3 className="font-[family-name:var(--font-dm-serif)] text-3xl md:text-4xl">
+              {/* Content */}
+              <div className="absolute inset-x-0 bottom-0 p-4 text-white sm:p-7 md:p-9">
+                <h3 className="font-[family-name:var(--font-dm-serif)] text-lg leading-tight sm:text-3xl md:text-4xl">
                   {category.name}
                 </h3>
 
-                <div className="mt-3 flex items-center justify-between gap-4">
-                  <p className="max-w-sm text-sm leading-6 text-white/80">
+                <div className="mt-2 flex items-end justify-between gap-3 sm:mt-3 sm:items-center sm:gap-4">
+                  <p className="hidden max-w-sm text-sm leading-6 text-white/80 sm:block">
                     {category.description}
                   </p>
 
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/40 bg-white/10 text-xl backdrop-blur-sm transition-all duration-300 group-hover:bg-white group-hover:text-green-900">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/40 bg-white/10 text-base backdrop-blur-sm transition-all duration-300 group-hover:bg-white group-hover:text-green-900 sm:h-11 sm:w-11 sm:text-xl">
                     →
                   </span>
                 </div>
               </div>
             </Link>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

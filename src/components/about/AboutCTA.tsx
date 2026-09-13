@@ -1,14 +1,15 @@
 import Link from "next/link";
+import Reveal from "@/components/ui/Reveal";
 
 export default function AboutCTA() {
   return (
-    <section className="bg-green-950 px-6 py-24 text-center md:py-28">
-      <div className="mx-auto max-w-3xl">
+    <section className="bg-green-950 px-6 py-16 text-center md:py-24">
+      <Reveal className="mx-auto max-w-3xl">
         <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#DDE8D8]">
           From our farm to your table
         </p>
 
-        <h2 className="mt-5 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-white sm:text-5xl md:text-6xl">
+        <h2 className="mt-5 font-[family-name:var(--font-dm-serif)] text-3xl leading-tight text-white sm:text-4xl md:text-5xl">
           Want to know what&apos;s fresh?
         </h2>
 
@@ -32,7 +33,7 @@ export default function AboutCTA() {
             Contact Us
           </Link>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

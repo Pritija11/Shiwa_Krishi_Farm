@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Sprout, Tractor, HeartHandshake } from "lucide-react";
+import Reveal from "@/components/ui/Reveal";
 
 const values = [
   {
@@ -22,11 +23,11 @@ const values = [
 
 export default function AboutFarm() {
   return (
-    <section className="bg-[#EFE8DA] px-6 py-24 md:py-32">
+    <section className="bg-[#EFE8DA] px-6 py-16 md:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
           {/* Farm Image */}
-          <div className="relative h-[480px] overflow-hidden rounded-3xl md:h-[560px]">
+          <Reveal className="relative h-[320px] overflow-hidden rounded-3xl sm:h-[420px] md:h-[480px] lg:h-[560px]">
             <Image
               src="/images/farm-about.jpg"
               alt="Shiwa Krishi Farm"
@@ -34,15 +35,15 @@ export default function AboutFarm() {
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover object-top"
             />
-          </div>
+          </Reveal>
 
           {/* Content */}
-          <div>
+          <Reveal>
             <p className="mb-4 text-sm font-medium uppercase tracking-[0.25em] text-green-700">
               About Our Farm
             </p>
 
-            <h2 className="font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-green-950 sm:text-5xl md:text-6xl">
+            <h2 className="font-[family-name:var(--font-dm-serif)] text-3xl leading-tight text-green-950 sm:text-4xl md:text-5xl">
               Rooted in nature.
               <span className="block text-green-700">Raised with care.</span>
             </h2>
@@ -86,7 +87,7 @@ export default function AboutFarm() {
                 );
               })}
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

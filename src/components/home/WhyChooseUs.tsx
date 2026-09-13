@@ -4,6 +4,7 @@ import {
   MapPin,
   Sprout,
 } from "lucide-react";
+import Reveal from "@/components/ui/Reveal";
 
 const trustPoints = [
   {
@@ -34,7 +35,7 @@ const trustPoints = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="relative overflow-hidden bg-[#173A2A] px-6 py-24 md:py-32">
+    <section className="relative overflow-hidden bg-[#173A2A] px-6 py-16 md:py-24">
       {/* Decorative Background */}
       <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-green-400/5 blur-3xl" />
 
@@ -42,7 +43,7 @@ export default function WhyChooseUs() {
 
       <div className="relative mx-auto max-w-7xl">
         {/* Heading */}
-        <div className="mx-auto max-w-3xl text-center">
+        <Reveal className="mx-auto max-w-3xl text-center">
           <div className="flex items-center justify-center gap-4">
             <span className="h-px w-10 bg-green-200/30" />
 
@@ -53,7 +54,7 @@ export default function WhyChooseUs() {
             <span className="h-px w-10 bg-green-200/30" />
           </div>
 
-          <h2 className="mt-5 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-[#F8F5ED] sm:text-5xl md:text-6xl">
+          <h2 className="mt-5 font-[family-name:var(--font-dm-serif)] text-3xl leading-tight text-[#F8F5ED] sm:text-4xl md:text-5xl">
             Good food begins
             <span className="block text-green-200">
               with good care.
@@ -64,10 +65,10 @@ export default function WhyChooseUs() {
             At Shiwa Krishi Farm, we believe trust is built through care,
             quality, and a genuine connection between our farm and your table.
           </p>
-        </div>
+        </Reveal>
 
         {/* Trust Points */}
-        <div className="mt-16 grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal className="mt-16 grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
           {trustPoints.map((point) => {
             const Icon = point.icon;
 
@@ -90,7 +91,7 @@ export default function WhyChooseUs() {
               </div>
             );
           })}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

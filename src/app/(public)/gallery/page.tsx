@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 import { getS3Url } from "@/lib/s3-url";
+import Reveal from "@/components/ui/Reveal";
 
 export default async function GalleryPage() {
   const galleryItems = await prisma.galleryItem.findMany({
@@ -24,20 +25,20 @@ export default async function GalleryPage() {
   return (
     <main className="bg-[#F8F5ED]">
       {/* Hero */}
-      <section className="px-6 pb-20 pt-36 md:pb-28">
+      <section className="px-6 pb-10 pt-28 md:pb-12 md:pt-32">
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-green-800">
             Farm Gallery
           </p>
 
-          <h1 className="mt-4 font-[family-name:var(--font-dm-serif)] text-5xl leading-tight text-green-950 sm:text-6xl md:text-7xl">
+          <h1 className="mt-4 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-green-950 sm:text-5xl md:text-6xl">
             A glimpse of
             <span className="block text-green-800">
               life on our farm.
             </span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
             From the animals we raise to the produce we grow, take a
             closer look at the everyday life behind Shiwa Krishi Farm.
           </p>
@@ -45,24 +46,25 @@ export default async function GalleryPage() {
       </section>
 
       {/* Gallery */}
-      <section className="bg-white px-6 py-20 md:py-28">
+      <section className="bg-white px-6 py-16 md:py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-10">
+          <Reveal className="mb-10">
             <p className="text-xs font-medium uppercase tracking-[0.25em] text-green-800">
               Behind the scenes
             </p>
 
-            <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-4xl text-green-950 sm:text-5xl">
+            <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-3xl text-green-950 sm:text-4xl md:text-5xl">
               Life at Shiwa Krishi Farm
             </h2>
-          </div>
+          </Reveal>
 
+          <Reveal>
           {itemsWithUrls.length > 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
               {itemsWithUrls.map((item) => (
                 <div
                   key={item.id}
-                  className="group relative overflow-hidden rounded-[1.75rem]"
+                  className="group relative overflow-hidden rounded-2xl sm:rounded-[1.75rem]"
                 >
                   <div className="relative aspect-[4/3] bg-stone-100">
                     {item.mediaType === "IMAGE" ? (
@@ -71,23 +73,23 @@ export default async function GalleryPage() {
                           src={item.mediaUrl}
                           alt={item.title}
                           fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                         />
 
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-                        <div className="absolute inset-x-0 bottom-0 p-6">
-                          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/70">
+                        <div className="absolute inset-x-0 bottom-0 p-3 sm:p-6">
+                          <p className="text-[9px] font-medium uppercase tracking-[0.15em] text-white/70 sm:text-[10px] sm:tracking-[0.2em]">
                             {formatCategory(item.category)}
                           </p>
 
-                          <h3 className="mt-1 font-[family-name:var(--font-dm-serif)] text-2xl text-white">
+                          <h3 className="mt-1 font-[family-name:var(--font-dm-serif)] text-base text-white sm:text-2xl">
                             {item.title}
                           </h3>
 
                           {item.description && (
-                            <p className="mt-2 line-clamp-2 text-xs leading-5 text-white/70">
+                            <p className="mt-1 hidden line-clamp-2 text-xs leading-5 text-white/70 sm:mt-2 sm:block">
                               {item.description}
                             </p>
                           )}
@@ -106,17 +108,17 @@ export default async function GalleryPage() {
 
                   {/* Video information */}
                   {item.mediaType === "VIDEO" && (
-                    <div className="bg-white p-5">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-green-800">
+                    <div className="bg-white p-3 sm:p-5">
+                      <p className="text-[9px] font-medium uppercase tracking-[0.15em] text-green-800 sm:text-[10px] sm:tracking-[0.2em]">
                         {formatCategory(item.category)}
                       </p>
 
-                      <h3 className="mt-1 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950">
+                      <h3 className="mt-1 font-[family-name:var(--font-dm-serif)] text-base text-green-950 sm:text-2xl">
                         {item.title}
                       </h3>
 
                       {item.description && (
-                        <p className="mt-2 text-xs leading-5 text-stone-500">
+                        <p className="mt-1 hidden text-xs leading-5 text-stone-500 sm:mt-2 sm:block">
                           {item.description}
                         </p>
                       )}
@@ -137,18 +139,19 @@ export default async function GalleryPage() {
               </p>
             </div>
           )}
+          </Reveal>
         </div>
       </section>
 
       {/* Farm Stories */}
-      <section className="px-6 py-20 md:py-28">
+      <section className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-5xl">
-          <div className="rounded-[2rem] bg-green-950 px-8 py-16 text-center sm:px-12 md:py-20">
+          <Reveal className="rounded-[2rem] bg-green-950 px-6 py-12 text-center sm:px-12 md:py-16">
             <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#DDE8D8]">
               Farm Stories
             </p>
 
-            <h2 className="mt-4 font-[family-name:var(--font-dm-serif)] text-4xl text-white sm:text-5xl">
+            <h2 className="mt-4 font-[family-name:var(--font-dm-serif)] text-3xl text-white sm:text-4xl md:text-5xl">
               More than just a farm.
             </h2>
 
@@ -157,18 +160,18 @@ export default async function GalleryPage() {
               from caring for our animals to growing fresh produce
               for our community.
             </p>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="bg-[#E7E3D8] px-6 py-20 text-center md:py-24">
-        <div className="mx-auto max-w-2xl">
+      <section className="bg-[#E7E3D8] px-6 py-16 text-center md:py-24">
+        <Reveal className="mx-auto max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-green-800">
             From our farm to your table
           </p>
 
-          <h2 className="mt-4 font-[family-name:var(--font-dm-serif)] text-4xl text-green-950 sm:text-5xl">
+          <h2 className="mt-4 font-[family-name:var(--font-dm-serif)] text-3xl text-green-950 sm:text-4xl md:text-5xl">
             Want to try our farm-fresh products?
           </h2>
 
@@ -183,7 +186,7 @@ export default async function GalleryPage() {
           >
             Explore Products
           </Link>
-        </div>
+        </Reveal>
       </section>
     </main>
   );

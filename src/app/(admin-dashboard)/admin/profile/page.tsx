@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import ChangePasswordForm from "@/components/admin/ChangePasswordForm";
 
 export default async function AdminProfilePage() {
   const session = await auth();
@@ -8,9 +10,15 @@ export default async function AdminProfilePage() {
     redirect("/admin/login");
   }
 
-  const name = session.user.name || "Admin";
-  const phone = session.user.phone || "Not provided";
-  const role = session.user.role || "ADMIN";
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, phone: true, email: true, role: true },
+  });
+
+  const name = user?.name || "Admin";
+  const phone = user?.phone || "Not provided";
+  const email = user?.email || "Not set";
+  const role = user?.role || "ADMIN";
 
   const initials = name
     .split(" ")
@@ -87,6 +95,25 @@ export default async function AdminProfilePage() {
             <div className="flex items-center justify-between px-6 py-5">
               <div>
                 <p className="text-xs uppercase tracking-wider text-green-950/40">
+                  Email
+                </p>
+
+                <p className="mt-1 text-sm font-medium text-green-950">
+                  {email}
+                </p>
+
+                {!user?.email && (
+                  <p className="mt-1 text-xs text-stone-500">
+                    Set an email (via the admin seed script) to receive
+                    password reset links.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between px-6 py-5">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-green-950/40">
                   Role
                 </p>
 
@@ -95,6 +122,21 @@ export default async function AdminProfilePage() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Change Password */}
+        <div className="mt-8 overflow-hidden rounded-2xl border border-green-900/10 bg-white p-6 sm:p-8">
+          <h2 className="text-lg font-semibold text-green-950">
+            Change Password
+          </h2>
+
+          <p className="mt-1 text-sm text-green-950/50">
+            Update your admin account password.
+          </p>
+
+          <div className="mt-6">
+            <ChangePasswordForm />
           </div>
         </div>
       </div>
