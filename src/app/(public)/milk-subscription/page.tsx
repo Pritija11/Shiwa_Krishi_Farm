@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import MilkSubscriptionForm from "@/components/milk-subscription/MilkSubscriptionForm";
+
+export const metadata: Metadata = {
+  title: "Milk Subscription",
+  description:
+    "Subscribe to fresh cow milk delivery from Shiwa Krishi Farm. Choose daily, weekly, or custom delivery days that fit your household.",
+};
 
 export default async function MilkSubscriptionPage() {
   const [settings, milkProducts] = await Promise.all([

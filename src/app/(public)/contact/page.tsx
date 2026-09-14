@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
@@ -11,6 +12,12 @@ import {
 import ContactForm from "@/components/contact/ContactForm";
 import Reveal from "@/components/ui/Reveal";
 import { createWhatsAppLinkUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
+
+export const metadata: Metadata = {
+  title: "Contact Us",
+  description:
+    "Get in touch with Shiwa Krishi Farm by phone, WhatsApp, or our contact form. Find our farm location, working hours, and delivery areas.",
+};
 
 export default async function ContactPage() {
   const settings = await prisma.siteSettings.findUnique({
@@ -193,17 +200,30 @@ export default async function ContactPage() {
           </Reveal>
         </div>
 
-        {/* Google Maps Button */}
-        {settings.googleMapsUrl && (
-          <div className="mx-auto mt-6 max-w-7xl text-right">
-            <a
-              href={settings.googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block rounded-full bg-green-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-green-800"
-            >
-              Open in Google Maps
-            </a>
+        {/* Google Maps / Business Profile Buttons */}
+        {(settings.googleMapsUrl || settings.googleBusinessProfileUrl) && (
+          <div className="mx-auto mt-6 flex max-w-7xl flex-wrap justify-end gap-3">
+            {settings.googleBusinessProfileUrl && (
+              <a
+                href={settings.googleBusinessProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded-full border border-green-900/20 px-6 py-3 text-sm font-medium text-green-900 transition hover:bg-green-900/5"
+              >
+                Find us on Google
+              </a>
+            )}
+
+            {settings.googleMapsUrl && (
+              <a
+                href={settings.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded-full bg-green-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-green-800"
+              >
+                Open in Google Maps
+              </a>
+            )}
           </div>
         )}
       </section>

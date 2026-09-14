@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import OrderForm from "@/components/order/OrderForm";
 import { createWhatsAppLinkUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
+
+export const metadata: Metadata = {
+  title: "Order / Enquiry",
+  description:
+    "Order fresh poultry, goat meat, milk, or vegetables from Shiwa Krishi Farm. Fill out our enquiry form and we'll confirm availability and delivery.",
+};
 
 type OrderPageProps = {
   searchParams: Promise<{

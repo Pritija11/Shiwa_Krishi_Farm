@@ -272,6 +272,7 @@ model SiteSettings {
   address      String
   locationUrl  String?
   googleMapsUrl String?
+  googleBusinessProfileUrl String?
 
   workingHours  String?
   deliveryAreas String?

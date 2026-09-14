@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 import { getS3Url } from "@/lib/s3-url";
 import Reveal from "@/components/ui/Reveal";
+
+export const metadata: Metadata = {
+  title: "Gallery",
+  description:
+    "Photos of Shiwa Krishi Farm — our animals, produce, and everyday life on the farm.",
+};
 
 export default async function GalleryPage() {
   const galleryItems = await prisma.galleryItem.findMany({

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import ProductsHero from "@/components/products/ProductsHero";
 import CategoryFilter from "@/components/products/CategoryFilter";
 import ProductGrid, {
@@ -5,6 +6,12 @@ import ProductGrid, {
 } from "@/components/products/ProductGrid";
 import { prisma } from "@/lib/prisma";
 import { getS3Url } from "@/lib/s3-url";
+
+export const metadata: Metadata = {
+  title: "Our Products",
+  description:
+    "Browse fresh poultry & eggs, goat meat, cow milk, and organic vegetables from Shiwa Krishi Farm, with current availability and pricing.",
+};
 
 const PRODUCTS_PER_PAGE = 12;
 

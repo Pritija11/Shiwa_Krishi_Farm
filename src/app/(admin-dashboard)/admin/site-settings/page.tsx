@@ -36,6 +36,7 @@ export default async function SiteSettingsPage() {
             address: settings?.address ?? "",
             locationUrl: settings?.locationUrl ?? "",
             googleMapsUrl: settings?.googleMapsUrl ?? "",
+            googleBusinessProfileUrl: settings?.googleBusinessProfileUrl ?? "",
             workingHours: settings?.workingHours ?? "",
             deliveryAreas: settings?.deliveryAreas ?? "",
             deliveryDays: settings?.deliveryDays ?? "",

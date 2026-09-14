@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, Leaf, MapPin, Sprout } from "lucide-react";
@@ -12,6 +13,26 @@ type ProductDetailPageProps = {
 };
 
 const RELATED_COUNT = 3;
+
+export async function generateMetadata({
+  params,
+}: ProductDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  const product = await prisma.product.findUnique({
+    where: { id },
+    select: { name: true, description: true, isActive: true },
+  });
+
+  if (!product || !product.isActive) {
+    return { title: "Product Not Found" };
+  }
+
+  return {
+    title: product.name,
+    description: product.description,
+  };
+}
 
 const trustPoints = [
   {

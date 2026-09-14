@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | Shiwa Krishi Farm",
+  title: "Terms & Conditions",
   description:
     "Read the Terms and Conditions for using the Shiwa Krishi Farm website, placing enquiries, orders, and requesting milk subscriptions.",
 };

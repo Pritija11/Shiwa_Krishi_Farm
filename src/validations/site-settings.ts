@@ -8,6 +8,7 @@ export const siteSettingsSchema = z.object({
 
   locationUrl: z.string().trim().optional(),
   googleMapsUrl: z.string().trim().optional(),
+  googleBusinessProfileUrl: z.string().trim().optional(),
   workingHours: z.string().trim().optional(),
   deliveryAreas: z.string().trim().optional(),
   deliveryDays: z.string().trim().optional(),
