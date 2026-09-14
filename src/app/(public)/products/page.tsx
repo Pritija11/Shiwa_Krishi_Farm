@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import ProductsHero from "@/components/products/ProductsHero";
 import CategoryFilter from "@/components/products/CategoryFilter";
 import ProductGrid, {
@@ -6,10 +7,26 @@ import ProductGrid, {
 import { prisma } from "@/lib/prisma";
 import { getS3Url } from "@/lib/s3-url";
 
+export const metadata: Metadata = {
+  title: "Our Products",
+  description:
+    "Browse fresh poultry & eggs, goat meat, cow milk, and organic vegetables from Shiwa Krishi Farm, with current availability and pricing.",
+};
+
+const PRODUCTS_PER_PAGE = 12;
+
 type ProductsPageProps = {
   searchParams: Promise<{
     category?: string;
+    availability?: string;
+    sort?: string;
+    page?: string;
   }>;
+};
+
+const availabilityFilterMap: Record<string, "IN_STOCK" | "SEASONAL"> = {
+  "in-stock": "IN_STOCK",
+  seasonal: "SEASONAL",
 };
 
 function formatAvailability(
@@ -30,32 +47,65 @@ function formatAvailability(
 export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
-  const { category } = await searchParams;
+  const { category, availability, sort, page } = await searchParams;
 
-  const [categories, productsFromDb] = await Promise.all([
+  const availabilityFilter = availability
+    ? availabilityFilterMap[availability]
+    : undefined;
+
+  const orderBy =
+    sort === "price-asc"
+      ? { price: "asc" as const }
+      : sort === "price-desc"
+        ? { price: "desc" as const }
+        : { createdAt: "desc" as const };
+
+  const where = {
+    isActive: true,
+    ...(category
+      ? {
+          categoryId: category,
+        }
+      : {}),
+    ...(availabilityFilter
+      ? {
+          availability: availabilityFilter,
+        }
+      : {}),
+  };
+
+  const [categories, totalCount] = await Promise.all([
     prisma.category.findMany({
       orderBy: {
         name: "asc",
       },
     }),
 
-    prisma.product.findMany({
-      where: {
-        isActive: true,
-        ...(category
-          ? {
-              categoryId: category,
-            }
-          : {}),
-      },
-      include: {
-        category: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
+    prisma.product.count({ where }),
   ]);
+
+  const totalPages = Math.max(
+    Math.ceil(totalCount / PRODUCTS_PER_PAGE),
+    1
+  );
+
+  const requestedPage = Number(page) || 1;
+  const currentPage = Math.min(
+    Math.max(requestedPage, 1),
+    totalPages
+  );
+
+  const productsFromDb = await prisma.product.findMany({
+    where,
+    include: {
+      category: true,
+    },
+    orderBy,
+    skip: (currentPage - 1) * PRODUCTS_PER_PAGE,
+    take: PRODUCTS_PER_PAGE,
+  });
+
+  const hasActiveFilters = Boolean(category) || Boolean(availabilityFilter);
 
   const products: Product[] = await Promise.all(
     productsFromDb.map(async (product) => ({
@@ -80,7 +130,12 @@ export default async function ProductsPage({
 
       <CategoryFilter categories={categories} />
 
-      <ProductGrid products={products} />
+      <ProductGrid
+        products={products}
+        hasActiveFilters={hasActiveFilters}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
     </main>
   );
 }

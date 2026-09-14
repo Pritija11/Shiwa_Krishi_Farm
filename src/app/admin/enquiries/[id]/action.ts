@@ -35,3 +35,36 @@ export async function updateEnquiryStatus(
   revalidatePath("/admin/enquiries");
   revalidatePath(`/admin/enquiries/${id}`);
 }
+
+export async function deleteEnquiry(id: string) {
+  const session = await auth();
+
+  if (session?.user?.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const enquiry = await prisma.enquiry.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!enquiry) {
+    throw new Error("Enquiry not found.");
+  }
+
+  if (enquiry.status !== "CANCELLED") {
+    throw new Error(
+      "Only cancelled enquiries can be deleted."
+    );
+  }
+
+  await prisma.enquiry.delete({
+    where: {
+      id,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/enquiries");
+}

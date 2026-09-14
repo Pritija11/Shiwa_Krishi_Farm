@@ -5,15 +5,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 type PaginationProps = {
   currentPage: number;
   totalPages: number;
-  search?: string;
-  status?: string;
+  basePath: string;
+  extraParams?: Record<string, string | undefined>;
 };
 
 export default function Pagination({
   currentPage,
   totalPages,
-  search,
-  status,
+  basePath,
+  extraParams = {},
 }: PaginationProps) {
   if (totalPages <= 1) {
     return null;
@@ -24,15 +24,13 @@ export default function Pagination({
 
     params.set("page", page.toString());
 
-    if (search) {
-      params.set("search", search);
+    for (const [key, value] of Object.entries(extraParams)) {
+      if (value && value !== "ALL") {
+        params.set(key, value);
+      }
     }
 
-    if (status && status !== "ALL") {
-      params.set("status", status);
-    }
-
-    return `/admin/enquiries?${params.toString()}`;
+    return `${basePath}?${params.toString()}`;
   };
 
   return (
@@ -97,4 +95,3 @@ export default function Pagination({
     </div>
   );
 }
-

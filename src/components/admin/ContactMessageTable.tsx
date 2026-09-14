@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { Eye } from "lucide-react";
+
+import DeleteContactMessageButton from "@/components/admin/DeleteContactMessageButton";
 
 type ContactMessage = {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
   email: string | null;
   subject: string | null;
   message: string;
@@ -75,13 +78,21 @@ export default function ContactMessageTable({
 
                 <td className="px-6 py-4">
                   <div className="space-y-1">
-                    <p className="text-sm text-stone-700">
-                      {message.phone}
-                    </p>
+                    {message.phone && (
+                      <p className="text-sm text-stone-700">
+                        {message.phone}
+                      </p>
+                    )}
 
                     {message.email && (
                       <p className="max-w-[180px] truncate text-xs text-stone-500">
                         {message.email}
+                      </p>
+                    )}
+
+                    {!message.phone && !message.email && (
+                      <p className="text-xs italic text-stone-400">
+                        No contact info
                       </p>
                     )}
                   </div>
@@ -114,12 +125,22 @@ export default function ContactMessageTable({
                 </td>
 
                 <td className="px-6 py-4 text-right">
-                  <Link
-                    href={`/admin/contact-messages/${message.id}`}
-                    className="text-sm font-medium text-green-800 transition hover:text-green-950"
-                  >
-                    View
-                  </Link>
+                  <div className="flex items-center justify-end gap-4">
+                    <Link
+                      href={`/admin/contact-messages/${message.id}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-green-800 transition hover:text-green-950"
+                    >
+                      <Eye size={16} strokeWidth={1.8} />
+                      View
+                    </Link>
+
+                    {message.status === "RESOLVED" && (
+                      <DeleteContactMessageButton
+                        messageId={message.id}
+                        customerName={message.name}
+                      />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -137,9 +158,11 @@ export default function ContactMessageTable({
                   {message.name}
                 </p>
 
-                <p className="mt-1 text-xs text-stone-500">
-                  {message.phone}
-                </p>
+                {message.phone && (
+                  <p className="mt-1 text-xs text-stone-500">
+                    {message.phone}
+                  </p>
+                )}
               </div>
 
               <span
@@ -174,12 +197,22 @@ export default function ContactMessageTable({
                 </p>
               </div>
 
-              <Link
-                href={`/admin/contact-messages/${message.id}`}
-                className="text-sm font-medium text-green-800 transition hover:text-green-950"
-              >
-                View
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link
+                  href={`/admin/contact-messages/${message.id}`}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-green-800 transition hover:text-green-950"
+                >
+                  <Eye size={16} strokeWidth={1.8} />
+                  View
+                </Link>
+
+                {message.status === "RESOLVED" && (
+                  <DeleteContactMessageButton
+                    messageId={message.id}
+                    customerName={message.name}
+                  />
+                )}
+              </div>
             </div>
           </div>
         ))}

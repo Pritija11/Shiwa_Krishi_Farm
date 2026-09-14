@@ -9,6 +9,7 @@ type SiteSettingsData = {
   address: string;
   locationUrl: string;
   googleMapsUrl: string;
+  googleBusinessProfileUrl: string;
   workingHours: string;
   deliveryAreas: string;
   deliveryDays: string;
@@ -44,9 +45,6 @@ export default function SiteSettingsForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    console.log("FORM SUBMITTED");
-    console.log("FORM DATA:", formData);
-
     setIsSaving(true);
     setSuccessMessage("");
     setErrorMessage("");
@@ -61,11 +59,7 @@ export default function SiteSettingsForm({
         body: JSON.stringify(formData),
       });
 
-      console.log("API STATUS:", response.status);
-
       const data = await response.json();
-
-      console.log("API RESPONSE:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to save settings");
@@ -80,6 +74,7 @@ export default function SiteSettingsForm({
         address: data.address ?? "",
         locationUrl: data.locationUrl ?? "",
         googleMapsUrl: data.googleMapsUrl ?? "",
+        googleBusinessProfileUrl: data.googleBusinessProfileUrl ?? "",
         workingHours: data.workingHours ?? "",
         deliveryAreas: data.deliveryAreas ?? "",
         deliveryDays: data.deliveryDays ?? "",
@@ -268,6 +263,31 @@ export default function SiteSettingsForm({
               value={formData.googleMapsUrl}
               onChange={handleChange}
               placeholder="https://share.google/..."
+              className="mt-2 w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-800 outline-none transition focus:border-green-700 focus:ring-2 focus:ring-green-700/10"
+            />
+          </div>
+
+          {/* Google Business Profile */}
+          <div>
+            <label
+              htmlFor="googleBusinessProfileUrl"
+              className="block text-sm font-medium text-green-950"
+            >
+              Google Business Profile Link
+            </label>
+
+            <p className="mt-1 text-xs text-stone-500">
+              Link to your Google Business Profile listing, shown as a
+              &quot;Find us on Google&quot; button on the Contact page.
+            </p>
+
+            <input
+              id="googleBusinessProfileUrl"
+              name="googleBusinessProfileUrl"
+              type="url"
+              value={formData.googleBusinessProfileUrl}
+              onChange={handleChange}
+              placeholder="https://g.page/..."
               className="mt-2 w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-800 outline-none transition focus:border-green-700 focus:ring-2 focus:ring-green-700/10"
             />
           </div>

@@ -6,6 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import SubscriptionStatusControl from "./SubscriptionStatusControl";
+import DeleteSubscriptionButton from "./DeleteSubscriptionButton";
+import {
+  formatDeliveryDays,
+  formatDuration,
+  type DayOfWeek,
+  type SubscriptionDuration,
+} from "@/lib/subscription-duration";
 
 type Subscription = {
   id: string;
@@ -13,9 +20,13 @@ type Subscription = {
   phone: string;
   quantity: string;
   unit: string;
-  frequency: "DAILY" | "WEEKLY";
+  frequency: "DAILY" | "WEEKLY" | "CUSTOM";
+  deliveryDays: DayOfWeek[];
   startDate: Date;
+  duration: SubscriptionDuration;
+  endDate: Date | null;
   status: "PENDING" | "ACTIVE" | "PAUSED" | "CANCELLED";
+  product: { name: string } | null;
 };
 
 type SubscriptionTableProps = {
@@ -137,6 +148,7 @@ export default function SubscriptionTable({
             <option value="ALL">All Frequencies</option>
             <option value="DAILY">Daily</option>
             <option value="WEEKLY">Weekly</option>
+            <option value="CUSTOM">Custom Days</option>
           </select>
 
           {/* Search Button */}
@@ -170,6 +182,10 @@ export default function SubscriptionTable({
               </th>
 
               <th className="px-5 py-4 text-xs font-medium uppercase tracking-wider text-stone-400">
+                Product
+              </th>
+
+              <th className="px-5 py-4 text-xs font-medium uppercase tracking-wider text-stone-400">
                 Quantity
               </th>
 
@@ -179,6 +195,10 @@ export default function SubscriptionTable({
 
               <th className="px-5 py-4 text-xs font-medium uppercase tracking-wider text-stone-400">
                 Start Date
+              </th>
+
+              <th className="px-5 py-4 text-xs font-medium uppercase tracking-wider text-stone-400">
+                Duration
               </th>
 
               <th className="px-5 py-4 text-xs font-medium uppercase tracking-wider text-stone-400">
@@ -210,6 +230,11 @@ export default function SubscriptionTable({
                   </div>
                 </td>
 
+                {/* Product */}
+                <td className="px-5 py-5 text-sm text-stone-600">
+                  {subscription.product?.name ?? "—"}
+                </td>
+
                 {/* Quantity */}
                 <td className="px-5 py-5 text-sm text-stone-600">
                   {subscription.quantity}{" "}
@@ -221,11 +246,30 @@ export default function SubscriptionTable({
                   <span className="text-sm text-stone-600">
                     {formatFrequency(subscription.frequency)}
                   </span>
+
+                  {subscription.deliveryDays.length > 0 && (
+                    <p className="mt-0.5 text-xs text-stone-400">
+                      {formatDeliveryDays(subscription.deliveryDays)}
+                    </p>
+                  )}
                 </td>
 
                 {/* Start Date */}
                 <td className="px-5 py-5 text-sm text-stone-600">
                   {formatDate(subscription.startDate)}
+                </td>
+
+                {/* Duration */}
+                <td className="px-5 py-5">
+                  <span className="text-sm text-stone-600">
+                    {formatDuration(subscription.duration)}
+                  </span>
+
+                  {subscription.endDate && (
+                    <p className="mt-0.5 text-xs text-stone-400">
+                      Ends {formatDate(subscription.endDate)}
+                    </p>
+                  )}
                 </td>
 
                 {/* Status */}
@@ -238,16 +282,25 @@ export default function SubscriptionTable({
 
                 {/* Action */}
                 <td className="px-5 py-5 text-right">
-                  <Link
-                    href={`/admin/subscriptions/${subscription.id}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50 hover:text-green-950"
-                  >
-                    <Eye
-                      size={16}
-                      strokeWidth={1.8}
-                    />
-                    View
-                  </Link>
+                  <div className="flex items-center justify-end gap-1">
+                    <Link
+                      href={`/admin/subscriptions/${subscription.id}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50 hover:text-green-950"
+                    >
+                      <Eye
+                        size={16}
+                        strokeWidth={1.8}
+                      />
+                      View
+                    </Link>
+
+                    {subscription.status === "CANCELLED" && (
+                      <DeleteSubscriptionButton
+                        subscriptionId={subscription.id}
+                        customerName={subscription.customerName}
+                      />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -286,6 +339,16 @@ export default function SubscriptionTable({
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-stone-400">
+                  Product
+                </p>
+
+                <p className="mt-1 text-sm text-stone-600">
+                  {subscription.product?.name ?? "—"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-stone-400">
                   Quantity
                 </p>
 
@@ -303,6 +366,12 @@ export default function SubscriptionTable({
                 <p className="mt-1 text-sm text-stone-600">
                   {formatFrequency(subscription.frequency)}
                 </p>
+
+                {subscription.deliveryDays.length > 0 && (
+                  <p className="text-xs text-stone-400">
+                    {formatDeliveryDays(subscription.deliveryDays)}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -313,6 +382,22 @@ export default function SubscriptionTable({
                 <p className="mt-1 text-sm text-stone-600">
                   {formatDate(subscription.startDate)}
                 </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-stone-400">
+                  Duration
+                </p>
+
+                <p className="mt-1 text-sm text-stone-600">
+                  {formatDuration(subscription.duration)}
+                </p>
+
+                {subscription.endDate && (
+                  <p className="text-xs text-stone-400">
+                    Ends {formatDate(subscription.endDate)}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -329,7 +414,7 @@ export default function SubscriptionTable({
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex items-center justify-end gap-1">
               <Link
                 href={`/admin/subscriptions/${subscription.id}`}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50"
@@ -337,6 +422,13 @@ export default function SubscriptionTable({
                 <Eye size={16} />
                 View details
               </Link>
+
+              {subscription.status === "CANCELLED" && (
+                <DeleteSubscriptionButton
+                  subscriptionId={subscription.id}
+                  customerName={subscription.customerName}
+                />
+              )}
             </div>
           </div>
         ))}
@@ -365,11 +457,18 @@ export default function SubscriptionTable({
 }
 
 function formatFrequency(
-  frequency: "DAILY" | "WEEKLY"
+  frequency: "DAILY" | "WEEKLY" | "CUSTOM"
 ) {
-  return frequency === "DAILY"
-    ? "Daily"
-    : "Weekly";
+  switch (frequency) {
+    case "DAILY":
+      return "Daily";
+
+    case "WEEKLY":
+      return "Weekly";
+
+    case "CUSTOM":
+      return "Custom Days";
+  }
 }
 
 function formatUnit(unit: string) {

@@ -2,6 +2,9 @@
 import Link from "next/link";
 import { Eye } from "lucide-react";
 
+import DeleteEnquiryButton from "@/components/admin/DeleteEnquiryButton";
+import type { Prisma } from "@/generated/prisma/client";
+
 type EnquiryStatus =
   | "NEW"
   | "CONTACTED"
@@ -14,7 +17,7 @@ type EnquiryTableProps = {
     id: string;
     customerName: string;
     phone: string;
-    quantity: any;
+    quantity: Prisma.Decimal;
     status: EnquiryStatus;
     createdAt: Date;
     product: {
@@ -59,7 +62,9 @@ export default function EnquiryTable({
   enquiries,
 }: EnquiryTableProps) {
   return (
-    <div className="overflow-x-auto">
+    <>
+      {/* Desktop Table */}
+      <div className="hidden overflow-x-auto md:block">
       <table className="w-full min-w-[850px]">
         <thead>
           <tr className="border-b border-stone-100 text-left">
@@ -157,20 +162,102 @@ export default function EnquiryTable({
 
                 {/* Action */}
                 <td className="px-6 py-5 text-right">
-                  <Link
-                    href={`/admin/enquiries/${enquiry.id}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50 hover:text-green-950"
-                  >
-                    <Eye size={16} strokeWidth={1.8} />
-                    View
-                  </Link>
+                  <div className="flex items-center justify-end gap-1">
+                    <Link
+                      href={`/admin/enquiries/${enquiry.id}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50 hover:text-green-950"
+                    >
+                      <Eye size={16} strokeWidth={1.8} />
+                      View
+                    </Link>
+
+                    {enquiry.status === "CANCELLED" && (
+                      <DeleteEnquiryButton
+                        enquiryId={enquiry.id}
+                        customerName={enquiry.customerName}
+                      />
+                    )}
+                  </div>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-    </div>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="divide-y divide-stone-100 md:hidden">
+        {enquiries.map((enquiry) => {
+          const today = isToday(enquiry.createdAt);
+
+          return (
+            <div key={enquiry.id} className="p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-green-950">
+                    {enquiry.customerName}
+                  </p>
+
+                  {today && (
+                    <span className="mt-1 inline-flex rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-700">
+                      New
+                    </span>
+                  )}
+                </div>
+
+                <span
+                  className={`inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-medium ${getStatusStyle(
+                    enquiry.status
+                  )}`}
+                >
+                  {enquiry.status}
+                </span>
+              </div>
+
+              <div className="mt-3 space-y-1.5">
+                <p className="text-sm text-stone-700">
+                  {enquiry.product.name}{" "}
+                  <span className="text-stone-400">
+                    · Quantity: {enquiry.quantity.toString()}
+                  </span>
+                </p>
+
+                <p className="text-sm text-stone-600">
+                  {enquiry.phone}
+                </p>
+
+                <p className="text-xs text-stone-500">
+                  {enquiry.createdAt.toLocaleDateString()}
+                  {today && (
+                    <span className="ml-1.5 text-green-700">
+                      Today
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              <div className="mt-4 flex items-center gap-1">
+                <Link
+                  href={`/admin/enquiries/${enquiry.id}`}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-green-800 transition hover:bg-green-50 hover:text-green-950"
+                >
+                  <Eye size={16} strokeWidth={1.8} />
+                  View
+                </Link>
+
+                {enquiry.status === "CANCELLED" && (
+                  <DeleteEnquiryButton
+                    enquiryId={enquiry.id}
+                    customerName={enquiry.customerName}
+                  />
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 

@@ -1,6 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import {
+  buildWhatsAppMessage,
+  closeWhatsAppWindow,
+  createWhatsAppUrl,
+  isWhatsAppConfigured,
+  openBlankWhatsAppWindow,
+  redirectToWhatsApp,
+} from "@/lib/whatsapp";
+import { fetchJsonWithTimeout } from "@/lib/fetchJson";
 import { enquirySchema } from "@/validations/enquiry";
 
 type Product = {
@@ -11,6 +21,7 @@ type Product = {
 type OrderFormProps = {
   products: Product[];
   selectedProduct?: string;
+  whatsapp: string;
 };
 
 type FormErrors = Partial<Record<string, string>>;
@@ -23,6 +34,7 @@ type Toast = {
 export default function OrderForm({
   products,
   selectedProduct = "",
+  whatsapp,
 }: OrderFormProps) {
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
@@ -60,6 +72,7 @@ export default function OrderForm({
       deliveryAddress: String(formData.get("address") || ""),
       preferredDate: String(formData.get("preferredDate") || ""),
       message: String(formData.get("message") || ""),
+      acceptTerms: formData.get("acceptTerms") === "on",
     };
 
     // Frontend Zod validation
@@ -82,8 +95,23 @@ export default function OrderForm({
       return;
     }
 
+    if (!isWhatsAppConfigured(whatsapp)) {
+      showToast(
+        "error",
+        "WhatsApp is not configured right now. Please try again later or contact us by phone."
+      );
+      setLoading(false);
+
+      return;
+    }
+
+    // Opened synchronously (before any await) so the browser still treats
+    // this as a direct result of the user's click and doesn't block it.
+    const whatsappWindow = openBlankWhatsAppWindow();
+
     try {
-      const response = await fetch("/api/enquiries", {
+      // Save enquiry first
+      const response = await fetchJsonWithTimeout("/api/enquiries", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,19 +122,54 @@ export default function OrderForm({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          result.error || "Failed to send enquiry."
-        );
+        throw new Error(result.error || "Failed to send enquiry.");
       }
 
+      // Find selected product name
+      const selectedProductData = products.find(
+        (product) => product.id === validation.data.productId
+      );
+
+      if (!selectedProductData) {
+        throw new Error("Selected product could not be found.");
+      }
+
+      // Build WhatsApp message
+      const whatsappMessage = buildWhatsAppMessage([
+        `Hello, I would like to order ${selectedProductData.name}.`,
+        "",
+        `Quantity: ${validation.data.quantity}`,
+        "",
+        `Delivery Address: ${validation.data.deliveryAddress}`,
+        `Preferred Date: ${validation.data.preferredDate}`,
+        validation.data.message
+          ? `Additional Message: ${validation.data.message}`
+          : "",
+        "",
+        "Thank you.",
+      ]);
+
+      // Create WhatsApp URL using reusable helper
+      const whatsappUrl = createWhatsAppUrl(
+        whatsapp,
+        whatsappMessage
+      );
+
+      // Reset form
       form.reset();
 
       showToast(
         "success",
-        "Your enquiry has been sent successfully!"
+        "Your enquiry was saved. Opening WhatsApp..."
       );
+
+      // Give the success message a moment before redirecting
+      setTimeout(() => {
+        redirectToWhatsApp(whatsappWindow, whatsappUrl);
+      }, 1000);
     } catch (error) {
       console.error(error);
+      closeWhatsAppWindow(whatsappWindow);
 
       showToast(
         "error",
@@ -358,18 +421,56 @@ export default function OrderForm({
           </div>
         </div>
 
+        {/* Terms Agreement */}
+        <div className="mt-6 flex items-start gap-3">
+          <input
+            id="acceptTerms"
+            name="acceptTerms"
+            type="checkbox"
+            required
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-stone-300 accent-green-800"
+          />
+
+          <label
+            htmlFor="acceptTerms"
+            className="text-sm leading-5 text-stone-600"
+          >
+            I have read and agree to the{" "}
+            <Link
+              href="/privacy"
+              className="font-medium text-green-800 underline underline-offset-2 hover:text-green-900"
+            >
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/terms"
+              className="font-medium text-green-800 underline underline-offset-2 hover:text-green-900"
+            >
+              Terms &amp; Conditions
+            </Link>
+            .
+          </label>
+        </div>
+
+        {fieldErrors.acceptTerms && (
+          <p className="mt-1.5 text-xs text-red-600">
+            {fieldErrors.acceptTerms}
+          </p>
+        )}
+
         {/* Submit */}
         <button
           type="submit"
           disabled={loading}
           className="mt-8 w-full rounded-full bg-green-900 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? "Sending..." : "Send Enquiry"}
+          {loading ? "Preparing WhatsApp..." : "Order via WhatsApp"}
         </button>
 
         <p className="mt-4 text-center text-xs leading-5 text-stone-500">
-          We&apos;ll contact you to confirm availability, price, and
-          delivery details.
+          Your enquiry will be saved, then WhatsApp will open with your
+          order details ready to send.
         </p>
       </form>
     </>

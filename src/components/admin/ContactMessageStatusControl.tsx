@@ -3,18 +3,14 @@
 import { useState, useTransition } from "react";
 
 import { updateContactMessageStatus } from "@/app/(admin-dashboard)/admin/contact-messages/[id]/action";
-
-type ContactMessageStatus = "NEW" | "READ" | "RESOLVED";
+import {
+  contactMessageStatusOrder,
+  type ContactMessageStatus,
+} from "@/lib/contact-message-status";
 
 type ContactMessageStatusControlProps = {
   id: string;
   currentStatus: ContactMessageStatus;
-};
-
-const statusOrder: Record<ContactMessageStatus, number> = {
-  NEW: 0,
-  READ: 1,
-  RESOLVED: 2,
 };
 
 const statusLabels: Record<ContactMessageStatus, string> = {
@@ -107,8 +103,9 @@ export default function ContactMessageStatusControl({
 function getNextStatus(
   currentStatus: ContactMessageStatus
 ): ContactMessageStatus | null {
-  const next = Object.entries(statusOrder).find(
-    ([, order]) => order === statusOrder[currentStatus] + 1
+  const next = Object.entries(contactMessageStatusOrder).find(
+    ([, order]) =>
+      order === contactMessageStatusOrder[currentStatus] + 1
   );
 
   return next ? (next[0] as ContactMessageStatus) : null;

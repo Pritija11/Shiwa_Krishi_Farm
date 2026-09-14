@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
@@ -10,6 +10,19 @@ import {
   Truck,
 } from "lucide-react";
 import ContactForm from "@/components/contact/ContactForm";
+import Reveal from "@/components/ui/Reveal";
+import {
+  createWhatsAppLinkUrl,
+  isWhatsAppConfigured,
+} from "@/lib/whatsapp";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Contact Us",
+  description:
+    "Get in touch with Shiwa Krishi Farm by phone, WhatsApp, or our contact form. Find our farm location, working hours, and delivery areas.",
+};
 
 export default async function ContactPage() {
   const settings = await prisma.siteSettings.findUnique({
@@ -34,23 +47,25 @@ export default async function ContactPage() {
     );
   }
 
-  const whatsappNumber = settings.whatsapp.replace(/\D/g, "");
+  const whatsappUrl = isWhatsAppConfigured(settings.whatsapp)
+    ? createWhatsAppLinkUrl(settings.whatsapp)
+    : null;
 
   return (
     <main className="bg-[#F8F5ED]">
       {/* Hero */}
-      <section className="px-6 pb-20 pt-36 md:pb-28">
+      <section className="px-6 pb-10 pt-28 md:pb-12 md:pt-32">
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-green-800">
             Get in Touch
           </p>
 
-          <h1 className="mt-4 font-[family-name:var(--font-dm-serif)] text-5xl leading-tight text-green-950 sm:text-6xl md:text-7xl">
+          <h1 className="mt-4 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-green-950 sm:text-5xl md:text-6xl">
             We&apos;d love to
             <span className="block text-green-800">hear from you.</span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
             Have a question about our products, delivery, or milk
             subscription? Get in touch with Shiwa Krishi Farm.
           </p>
@@ -58,15 +73,15 @@ export default async function ContactPage() {
       </section>
 
       {/* Contact Information */}
-      <section className="bg-white px-6 py-20 md:py-28">
+      <section className="bg-white px-6 py-16 md:py-24">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           {/* Information */}
-          <div>
+          <Reveal>
             <p className="text-xs font-medium uppercase tracking-[0.25em] text-green-800">
               Contact Information
             </p>
 
-            <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-4xl text-green-950 sm:text-5xl">
+            <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-3xl text-green-950 sm:text-4xl md:text-5xl">
               Let&apos;s connect
             </h2>
 
@@ -97,26 +112,28 @@ export default async function ContactPage() {
               </div>
 
               {/* WhatsApp */}
-              <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F6EF] text-green-800">
-                  <MessageCircle size={18} strokeWidth={1.8} />
-                </div>
+              {whatsappUrl && (
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F6EF] text-green-800">
+                    <MessageCircle size={18} strokeWidth={1.8} />
+                  </div>
 
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-stone-400">
-                    WhatsApp
-                  </p>
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-stone-400">
+                      WhatsApp
+                    </p>
 
-                  <a
-                    href={`https://wa.me/${whatsappNumber}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 block text-base font-medium text-green-900 hover:underline"
-                  >
-                    Chat with us on WhatsApp
-                  </a>
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 block text-base font-medium text-green-900 hover:underline"
+                    >
+                      Chat with us on WhatsApp
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Email */}
               <div className="flex items-start gap-4">
@@ -155,10 +172,10 @@ export default async function ContactPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Map */}
-          <div className="min-h-105 overflow-hidden rounded-4xl bg-[#E7E3D8]">
+          <Reveal className="min-h-105 overflow-hidden rounded-4xl bg-[#E7E3D8]">
             {settings.locationUrl ? (
               <iframe
                 src={settings.locationUrl}
@@ -185,29 +202,42 @@ export default async function ContactPage() {
                 </div>
               </div>
             )}
-          </div>
+          </Reveal>
         </div>
 
-        {/* Google Maps Button */}
-        {settings.googleMapsUrl && (
-          <div className="mx-auto mt-6 max-w-7xl text-right">
-            <a
-              href={settings.googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block rounded-full bg-green-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-green-800"
-            >
-              Open in Google Maps
-            </a>
+        {/* Google Maps / Business Profile Buttons */}
+        {(settings.googleMapsUrl || settings.googleBusinessProfileUrl) && (
+          <div className="mx-auto mt-6 flex max-w-7xl flex-wrap justify-end gap-3">
+            {settings.googleBusinessProfileUrl && (
+              <a
+                href={settings.googleBusinessProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded-full border border-green-900/20 px-6 py-3 text-sm font-medium text-green-900 transition hover:bg-green-900/5"
+              >
+                Find us on Google
+              </a>
+            )}
+
+            {settings.googleMapsUrl && (
+              <a
+                href={settings.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded-full bg-green-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-green-800"
+              >
+                Open in Google Maps
+              </a>
+            )}
           </div>
         )}
       </section>
 
       {/* Working Hours & Delivery */}
-      <section className="px-6 py-20 md:py-28">
+      <section className="px-6 py-16 md:py-24">
         <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2">
           {/* Working Hours */}
-          <div className="rounded-4xl border border-stone-200 bg-white p-8 sm:p-10">
+          <Reveal className="rounded-4xl border border-stone-200 bg-white p-8 sm:p-10">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F6EF] text-green-800">
                 <Clock size={18} strokeWidth={1.8} />
@@ -229,10 +259,10 @@ export default async function ContactPage() {
                 {settings.workingHours || "Contact us for working hours."}
               </p>
             </div>
-          </div>
+          </Reveal>
 
           {/* Delivery */}
-          <div className="rounded-4xl border border-stone-200 bg-white p-8 sm:p-10">
+          <Reveal className="rounded-4xl border border-stone-200 bg-white p-8 sm:p-10">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F6EF] text-green-800">
                 <Truck size={18} strokeWidth={1.8} />
@@ -278,19 +308,19 @@ export default async function ContactPage() {
                 </div>
               )}
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* Contact Form */}
-      <section className="px-6 py-20 md:py-28">
+      <section className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-3xl">
-          <div className="mb-10 text-center">
+          <Reveal className="mb-10 text-center">
             <p className="text-xs font-medium uppercase tracking-[0.25em] text-green-800">
               Send a Message
             </p>
 
-            <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-4xl text-green-950 sm:text-5xl">
+            <h2 className="mt-3 font-[family-name:var(--font-dm-serif)] text-3xl text-green-950 sm:text-4xl md:text-5xl">
               Have a question?
             </h2>
 
@@ -298,20 +328,22 @@ export default async function ContactPage() {
               Send us a message and we&apos;ll get back to you as soon as
               possible.
             </p>
-          </div>
+          </Reveal>
 
-          <ContactForm />
+          <Reveal>
+            <ContactForm whatsapp={settings.whatsapp} />
+          </Reveal>
         </div>
       </section>
 
       {/* Social Links */}
-      <section className="bg-green-950 px-6 py-20 text-center md:py-24">
-        <div className="mx-auto max-w-2xl">
+      <section className="bg-green-950 px-6 py-16 text-center md:py-24">
+        <Reveal className="mx-auto max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#DDE8D8]">
             Follow the farm
           </p>
 
-          <h2 className="mt-4 font-[family-name:var(--font-dm-serif)] text-4xl text-white sm:text-5xl">
+          <h2 className="mt-4 font-[family-name:var(--font-dm-serif)] text-3xl text-white sm:text-4xl md:text-5xl">
             Stay connected
           </h2>
 
@@ -354,7 +386,7 @@ export default async function ContactPage() {
               </Link>
             )}
           </div>
-        </div>
+        </Reveal>
       </section>
     </main>
   );

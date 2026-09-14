@@ -3,33 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type GalleryCategory =
-  | "FARM"
-  | "ANIMALS"
-  | "POULTRY"
-  | "GOATS"
-  | "DAIRY"
-  | "VEGETABLES"
-  | "FAMILY"
-  | "OTHER";
-
-type MediaType = "IMAGE" | "VIDEO";
+import {
+  GALLERY_CATEGORIES,
+  formatGalleryCategory,
+  type GalleryCategory,
+} from "@/lib/gallery-categories";
+import {
+  validateGalleryMediaFile,
+  uploadGalleryMedia,
+  getMediaTypeFromFile,
+  type MediaType,
+} from "@/lib/gallery-media";
 
 type ValidationFields = Record<string, string[]>;
-
-const categories: {
-  value: GalleryCategory;
-  label: string;
-}[] = [
-  { value: "FARM", label: "Farm" },
-  { value: "ANIMALS", label: "Animals" },
-  { value: "POULTRY", label: "Poultry" },
-  { value: "GOATS", label: "Goats" },
-  { value: "DAIRY", label: "Dairy" },
-  { value: "VEGETABLES", label: "Vegetables" },
-  { value: "FAMILY", label: "Family" },
-  { value: "OTHER", label: "Other" },
-];
 
 export default function NewGalleryItemPage() {
   const router = useRouter();
@@ -81,24 +67,10 @@ export default function NewGalleryItemPage() {
       return;
     }
 
-    const isImage = file.type.startsWith("image/");
-    const isVideo = file.type.startsWith("video/");
+    const validationError = validateGalleryMediaFile(file);
 
-    if (!isImage && !isVideo) {
-      setError("Please select an image or video file.");
-      return;
-    }
-
-    const maxSize = isImage
-      ? 5 * 1024 * 1024
-      : 50 * 1024 * 1024;
-
-    if (file.size > maxSize) {
-      setError(
-        isImage
-          ? "Image must be smaller than 5MB."
-          : "Video must be smaller than 50MB."
-      );
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -106,7 +78,7 @@ export default function NewGalleryItemPage() {
       URL.revokeObjectURL(previewUrl);
     }
 
-    const type: MediaType = isImage ? "IMAGE" : "VIDEO";
+    const type = getMediaTypeFromFile(file) as MediaType;
     const objectUrl = URL.createObjectURL(file);
 
     setSelectedFile(file);
@@ -129,28 +101,7 @@ export default function NewGalleryItemPage() {
     setError("");
 
     try {
-      const formData = new FormData();
-
-      formData.append("file", selectedFile);
-      formData.append("folder", "gallery");
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Failed to upload media."
-        );
-      }
-
-      return {
-        key: data.key as string,
-        mediaType: data.mediaType as MediaType,
-      };
+      return await uploadGalleryMedia(selectedFile);
     } catch (error) {
       console.error("Gallery media upload error:", error);
 
@@ -328,12 +279,9 @@ export default function NewGalleryItemPage() {
                   : "border-stone-200"
               }`}
             >
-              {categories.map((category) => (
-                <option
-                  key={category.value}
-                  value={category.value}
-                >
-                  {category.label}
+              {GALLERY_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {formatGalleryCategory(category)}
                 </option>
               ))}
             </select>

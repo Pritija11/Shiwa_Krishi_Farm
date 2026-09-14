@@ -1,8 +1,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Phone, MessageCircle, Mail, MapPin } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
+import { createWhatsAppLinkUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
 
 const quickLinks = [
   { name: "Home", href: "/" },
@@ -25,6 +27,11 @@ export default async function Footer() {
       id: "site-settings",
     },
   });
+
+  const whatsappUrl =
+    settings?.whatsapp && isWhatsAppConfigured(settings.whatsapp)
+      ? createWhatsAppLinkUrl(settings.whatsapp)
+      : null;
 
   return (
     <footer className="bg-[#173A2A] text-white">
@@ -96,33 +103,101 @@ export default async function Footer() {
             </h3>
 
             <div className="mt-5 space-y-4 text-sm text-green-50/65">
-              <p>
-                <span className="block text-xs uppercase tracking-wider text-green-200/70">
-                  Phone
-                </span>
-                {settings?.phone || "Not available"}
-              </p>
+              {/* Phone */}
+              <div className="flex items-start gap-3">
+                <Phone
+                  size={15}
+                  strokeWidth={1.8}
+                  className="mt-0.5 shrink-0 text-green-200/70"
+                />
 
-              <p>
-                <span className="block text-xs uppercase tracking-wider text-green-200/70">
-                  WhatsApp
-                </span>
-                {settings?.whatsapp || "Not available"}
-              </p>
+                <p>
+                  <span className="block text-xs uppercase tracking-wider text-green-200/70">
+                    Phone
+                  </span>
 
-              <p>
-                <span className="block text-xs uppercase tracking-wider text-green-200/70">
-                  Email
-                </span>
-                {settings?.email || "Not available"}
-              </p>
+                  {settings?.phone ? (
+                    <a
+                      href={`tel:${settings.phone}`}
+                      className="transition-colors hover:text-white"
+                    >
+                      {settings.phone}
+                    </a>
+                  ) : (
+                    "Not available"
+                  )}
+                </p>
+              </div>
 
-              <p>
-                <span className="block text-xs uppercase tracking-wider text-green-200/70">
-                  Location
-                </span>
-                {settings?.address || "Not available"}
-              </p>
+              {/* WhatsApp */}
+              <div className="flex items-start gap-3">
+                <MessageCircle
+                  size={15}
+                  strokeWidth={1.8}
+                  className="mt-0.5 shrink-0 text-green-200/70"
+                />
+
+                <p>
+                  <span className="block text-xs uppercase tracking-wider text-green-200/70">
+                    WhatsApp
+                  </span>
+
+                  {settings?.whatsapp && whatsappUrl ? (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-colors hover:text-white"
+                    >
+                      {settings.whatsapp}
+                    </a>
+                  ) : (
+                    "Not available"
+                  )}
+                </p>
+              </div>
+
+              {/* Email */}
+              <div className="flex items-start gap-3">
+                <Mail
+                  size={15}
+                  strokeWidth={1.8}
+                  className="mt-0.5 shrink-0 text-green-200/70"
+                />
+
+                <p>
+                  <span className="block text-xs uppercase tracking-wider text-green-200/70">
+                    Email
+                  </span>
+
+                  {settings?.email ? (
+                    <a
+                      href={`mailto:${settings.email}`}
+                      className="break-all transition-colors hover:text-white"
+                    >
+                      {settings.email}
+                    </a>
+                  ) : (
+                    "Not available"
+                  )}
+                </p>
+              </div>
+
+              {/* Location */}
+              <div className="flex items-start gap-3">
+                <MapPin
+                  size={15}
+                  strokeWidth={1.8}
+                  className="mt-0.5 shrink-0 text-green-200/70"
+                />
+
+                <p>
+                  <span className="block text-xs uppercase tracking-wider text-green-200/70">
+                    Location
+                  </span>
+                  {settings?.address || "Not available"}
+                </p>
+              </div>
             </div>
           </div>
         </div>

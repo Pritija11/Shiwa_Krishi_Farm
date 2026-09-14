@@ -2,21 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-
-type SiteSettingsInput = {
-  phone: string;
-  whatsapp: string;
-  email: string;
-  address: string;
-  locationUrl?: string;
-  googleMapsUrl?: string;
-  workingHours?: string;
-  deliveryAreas?: string;
-  deliveryDays?: string;
-  facebookUrl?: string;
-  instagramUrl?: string;
-  tiktokUrl?: string;
-};
+import { siteSettingsSchema } from "@/validations/site-settings";
 
 // GET /api/site-settings
 export async function GET() {
@@ -48,68 +34,60 @@ export async function PUT(request: Request) {
       );
     }
 
-    const body = (await request.json()) as SiteSettingsInput;
+    const body = await request.json();
 
-    if (!body.phone?.trim()) {
+    const result = siteSettingsSchema.safeParse(body);
+
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Phone number is required" },
+        {
+          error:
+            result.error.issues[0]?.message || "Validation failed",
+        },
         { status: 400 }
       );
     }
 
-    if (!body.whatsapp?.trim()) {
-      return NextResponse.json(
-        { error: "WhatsApp number is required" },
-        { status: 400 }
-      );
-    }
+    const {
+      phone,
+      whatsapp,
+      email,
+      address,
+      locationUrl,
+      googleMapsUrl,
+      googleBusinessProfileUrl,
+      workingHours,
+      deliveryAreas,
+      deliveryDays,
+      facebookUrl,
+      instagramUrl,
+      tiktokUrl,
+    } = result.data;
 
-    if (!body.email?.trim()) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!body.address?.trim()) {
-      return NextResponse.json(
-        { error: "Address is required" },
-        { status: 400 }
-      );
-    }
+    const data = {
+      phone,
+      whatsapp,
+      email,
+      address,
+      locationUrl: locationUrl || null,
+      googleMapsUrl: googleMapsUrl || null,
+      googleBusinessProfileUrl: googleBusinessProfileUrl || null,
+      workingHours: workingHours || null,
+      deliveryAreas: deliveryAreas || null,
+      deliveryDays: deliveryDays || null,
+      facebookUrl: facebookUrl || null,
+      instagramUrl: instagramUrl || null,
+      tiktokUrl: tiktokUrl || null,
+    };
 
     const settings = await prisma.siteSettings.upsert({
       where: {
         id: "site-settings",
       },
-      update: {
-        phone: body.phone.trim(),
-        whatsapp: body.whatsapp.trim(),
-        email: body.email.trim(),
-        address: body.address.trim(),
-        locationUrl: body.locationUrl?.trim() || null,
-        googleMapsUrl: body.googleMapsUrl?.trim() || null,
-        workingHours: body.workingHours?.trim() || null,
-        deliveryAreas: body.deliveryAreas?.trim() || null,
-        deliveryDays: body.deliveryDays?.trim() || null,
-        facebookUrl: body.facebookUrl?.trim() || null,
-        instagramUrl: body.instagramUrl?.trim() || null,
-        tiktokUrl: body.tiktokUrl?.trim() || null,
-      },
+      update: data,
       create: {
         id: "site-settings",
-        phone: body.phone.trim(),
-        whatsapp: body.whatsapp.trim(),
-        email: body.email.trim(),
-        address: body.address.trim(),
-        locationUrl: body.locationUrl?.trim() || null,
-        googleMapsUrl: body.googleMapsUrl?.trim() || null,
-        workingHours: body.workingHours?.trim() || null,
-        deliveryAreas: body.deliveryAreas?.trim() || null,
-        deliveryDays: body.deliveryDays?.trim() || null,
-        facebookUrl: body.facebookUrl?.trim() || null,
-        instagramUrl: body.instagramUrl?.trim() || null,
-        tiktokUrl: body.tiktokUrl?.trim() || null,
+        ...data,
       },
     });
 

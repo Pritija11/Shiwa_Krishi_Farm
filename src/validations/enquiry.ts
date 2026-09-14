@@ -54,6 +54,13 @@ export const enquirySchema = z.object({
   productId: z
     .string()
     .min(1, "Product is required"),
+
+  acceptTerms: z
+    .boolean()
+    .refine((value) => value === true, {
+      message:
+        "Please agree to the Privacy Policy and Terms & Conditions to continue.",
+    }),
 });
 
 export type EnquiryInput = z.infer<typeof enquirySchema>;

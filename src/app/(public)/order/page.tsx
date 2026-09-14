@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import OrderForm from "@/components/order/OrderForm";
+import { createWhatsAppLinkUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
+
+export const metadata: Metadata = {
+  title: "Order / Enquiry",
+  description:
+    "Order fresh poultry, goat meat, milk, or vegetables from Shiwa Krishi Farm. Fill out our enquiry form and we'll confirm availability and delivery.",
+};
 
 type OrderPageProps = {
   searchParams: Promise<{
@@ -13,18 +21,35 @@ export default async function OrderPage({
 }: OrderPageProps) {
   const { product } = await searchParams;
 
-  const products = await prisma.product.findMany({
-    where: {
-      isActive: true,
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+  const [products, settings] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+
+    prisma.siteSettings.findUnique({
+      where: {
+        id: "site-settings",
+      },
+      select: {
+        whatsapp: true,
+        phone: true,
+      },
+    }),
+  ]);
+
+  const whatsappUrl =
+    settings?.whatsapp && isWhatsAppConfigured(settings.whatsapp)
+      ? createWhatsAppLinkUrl(settings.whatsapp)
+      : null;
 
   return (
     <main className="bg-[#F8F5ED] px-6 pb-24 pt-36">
@@ -49,28 +74,36 @@ export default async function OrderPage({
         <OrderForm
           products={products}
           selectedProduct={product}
+          whatsapp={settings?.whatsapp ?? ""}
         />
 
-        {/* WhatsApp / Phone */}
+        {/* Direct Contact */}
         <div className="mt-8 text-center">
           <p className="text-sm text-stone-500">
             Prefer to contact us directly?
           </p>
 
           <div className="mt-3 flex justify-center gap-3">
-            <Link
-              href="#"
-              className="rounded-full border border-green-900/20 px-5 py-2.5 text-sm font-medium text-green-900 transition hover:bg-green-900/5"
-            >
-              WhatsApp
-            </Link>
+            {whatsappUrl && (
+              <Link
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-green-900/20 px-5 py-2.5 text-sm font-medium text-green-900 transition hover:bg-green-900/5"
+              >
+                WhatsApp
+              </Link>
+            )}
 
-            <Link
-              href="tel:+9770000000000"
-              className="rounded-full border border-green-900/20 px-5 py-2.5 text-sm font-medium text-green-900 transition hover:bg-green-900/5"
-            >
-              Call Us
-            </Link>
+            {settings?.phone && (
+              <Link
+                href={`tel:${settings.phone}`}
+                className="rounded-full border border-green-900/20 px-5 py-2.5 text-sm font-medium text-green-900 transition hover:bg-green-900/5"
+              >
+                Call Us
+              </Link>
+
+            )}
           </div>
         </div>
       </div>

@@ -4,14 +4,10 @@ import { revalidatePath } from "next/cache";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-
-const statusOrder = {
-  NEW: 0,
-  READ: 1,
-  RESOLVED: 2,
-} as const;
-
-type ContactMessageStatus = keyof typeof statusOrder;
+import {
+  contactMessageStatusOrder,
+  type ContactMessageStatus,
+} from "@/lib/contact-message-status";
 
 export async function updateContactMessageStatus(
   id: string,
@@ -42,7 +38,10 @@ export async function updateContactMessageStatus(
 
   const currentStatus = contactMessage.status as ContactMessageStatus;
 
-  if (statusOrder[newStatus] !== statusOrder[currentStatus] + 1) {
+  if (
+    contactMessageStatusOrder[newStatus] !==
+    contactMessageStatusOrder[currentStatus] + 1
+  ) {
     throw new Error("Invalid status transition");
   }
 
@@ -57,4 +56,40 @@ export async function updateContactMessageStatus(
 
   revalidatePath("/admin/contact-messages");
   revalidatePath(`/admin/contact-messages/${id}`);
+}
+
+export async function deleteContactMessage(id: string) {
+  const session = await auth();
+
+  if (session?.user?.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const contactMessage = await prisma.contactMessage.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      status: true,
+    },
+  });
+
+  if (!contactMessage) {
+    throw new Error("Contact message not found");
+  }
+
+  if (contactMessage.status !== "RESOLVED") {
+    throw new Error(
+      "Only resolved messages can be deleted."
+    );
+  }
+
+  await prisma.contactMessage.delete({
+    where: {
+      id,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/contact-messages");
 }

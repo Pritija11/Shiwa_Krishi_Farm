@@ -1,12 +1,13 @@
 import Link from "next/link";
+import Reveal from "@/components/ui/Reveal";
 
 export default function OrderCTA() {
   return (
-    <section className="relative overflow-hidden bg-[#F8F5ED] px-6 py-24 md:py-32">
+    <section className="relative overflow-hidden bg-[#F8F5ED] px-6 py-16 md:py-24">
       {/* Decorative Background */}
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-900/5 blur-3xl" />
 
-      <div className="relative mx-auto max-w-4xl text-center">
+      <Reveal className="relative mx-auto max-w-4xl text-center">
         {/* Label */}
         <div className="flex items-center justify-center gap-4">
           <span className="h-px w-10 bg-green-800/20" />
@@ -19,7 +20,7 @@ export default function OrderCTA() {
         </div>
 
         {/* Heading */}
-        <h2 className="mt-6 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-green-950 sm:text-5xl md:text-6xl">
+        <h2 className="mt-6 font-[family-name:var(--font-dm-serif)] text-3xl leading-tight text-green-950 sm:text-4xl md:text-5xl">
           Bring the goodness of our farm
           <span className="block text-green-700">
             to your table.
@@ -49,7 +50,7 @@ export default function OrderCTA() {
             Contact Us
           </Link>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

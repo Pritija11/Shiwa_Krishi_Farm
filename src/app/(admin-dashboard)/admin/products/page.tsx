@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { Plus, Package } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -10,10 +9,20 @@ export default async function AdminProductsPage() {
     prisma.product.findMany({
       include: {
         category: true,
+        images: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [
+        {
+          isActive: "desc",
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
     }),
 
     prisma.category.findMany({
@@ -25,14 +34,14 @@ export default async function AdminProductsPage() {
 
   // Generate temporary signed URLs for S3 images
   const productsWithUrls = await Promise.all(
-    products.map(async (product) => ({
-      ...product,
-      price: product.price.toString(),
-      imageUrl: product.imageUrl
-        ? await getS3Url(product.imageUrl)
-        : null,
-    }))
-  );
+  products.map(async (product) => ({
+    ...product,
+    price: product.price.toString(),
+    imageUrl: product.images[0]?.imageUrl
+      ? await getS3Url(product.images[0].imageUrl)
+      : null,
+  }))
+);
 
   return (
     <div className="px-6 py-8 lg:px-10 lg:py-10">
@@ -62,7 +71,7 @@ export default async function AdminProductsPage() {
       </div>
 
       {/* Summary */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
           <p className="text-xs text-stone-500">Total Products</p>
 
@@ -88,6 +97,14 @@ export default async function AdminProductsPage() {
                 (product) => product.availability === "OUT_OF_STOCK",
               ).length
             }
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+          <p className="text-xs text-stone-500">Archived</p>
+
+          <p className="mt-2 text-2xl font-semibold text-green-950">
+            {products.filter((product) => !product.isActive).length}
           </p>
         </div>
       </div>
@@ -119,10 +136,7 @@ export default async function AdminProductsPage() {
             </Link>
           </div>
         ) : (
-          <ProductTable
-            products={productsWithUrls}
-            categories={categories}
-          />
+          <ProductTable products={productsWithUrls} categories={categories} />
         )}
       </div>
     </div>

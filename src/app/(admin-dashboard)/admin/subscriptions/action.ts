@@ -3,19 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-
-const validTransitions = {
-  PENDING: ["ACTIVE", "CANCELLED"],
-  ACTIVE: ["PAUSED", "CANCELLED"],
-  PAUSED: ["ACTIVE", "CANCELLED"],
-  CANCELLED: [],
-} as const;
-
-type SubscriptionStatus =
-  | "PENDING"
-  | "ACTIVE"
-  | "PAUSED"
-  | "CANCELLED";
+import {
+  subscriptionTransitions,
+  type SubscriptionStatus,
+} from "@/lib/subscription-status";
 
 export async function updateSubscriptionStatus(
   subscriptionId: string,
@@ -69,7 +60,7 @@ export async function updateSubscriptionStatus(
   const currentStatus = subscription.status as SubscriptionStatus;
 
   // 6. Check whether this status change is allowed
-  const allowedStatuses = validTransitions[currentStatus];
+  const allowedStatuses = subscriptionTransitions[currentStatus];
 
   if (!allowedStatuses.includes(newStatus as never)) {
     return {
@@ -90,6 +81,54 @@ export async function updateSubscriptionStatus(
 
   // 8. Refresh affected pages
   revalidatePath(`/admin/subscriptions/${subscriptionId}`);
+  revalidatePath("/admin/subscriptions");
+
+  return {
+    success: true,
+  };
+}
+
+export async function deleteSubscription(subscriptionId: string) {
+  const session = await auth();
+
+  if (session?.user?.role !== "ADMIN") {
+    return {
+      success: false,
+      error: "You are not authorized to perform this action.",
+    };
+  }
+
+  const subscription = await prisma.milkSubscription.findUnique({
+    where: {
+      id: subscriptionId,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (!subscription) {
+    return {
+      success: false,
+      error: "Subscription not found.",
+    };
+  }
+
+  if (subscription.status !== "CANCELLED") {
+    return {
+      success: false,
+      error: "Only cancelled subscriptions can be deleted.",
+    };
+  }
+
+  await prisma.milkSubscription.delete({
+    where: {
+      id: subscriptionId,
+    },
+  });
+
+  revalidatePath("/admin");
   revalidatePath("/admin/subscriptions");
 
   return {

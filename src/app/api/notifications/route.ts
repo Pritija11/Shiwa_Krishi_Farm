@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/notifications
 export async function GET(request: Request) {
   try {
+
     // ---------------------------------------
     // Authentication
     // ---------------------------------------
@@ -65,6 +65,7 @@ export async function GET(request: Request) {
 // PATCH /api/notifications
 export async function PATCH(request: Request) {
   try {
+
     // ---------------------------------------
     // Authentication
     // ---------------------------------------

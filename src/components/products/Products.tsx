@@ -1,53 +1,105 @@
 import Link from "next/link";
 import ProductCard from "@/components/products/ProductCard";
+import { prisma } from "@/lib/prisma";
+import { getS3Url } from "@/lib/s3-url";
+import Reveal from "@/components/ui/Reveal";
 
-const products = [
-  {
-    id: "fresh-cow-milk",
-    name: "Fresh Cow Milk",
-    category: "Dairy",
-    description: "Fresh cow milk collected with care from our farm.",
-    price: 120,
-    unit: "litre",
-    image: "/images/hero-dairy.jpg",
-    availability: "In Stock" as const,
-    subscription: true,
-  },
-  {
-    id: "farm-fresh-eggs",
-    name: "Farm Fresh Eggs",
-    category: "Poultry",
-    description: "Fresh eggs from carefully raised farm poultry.",
-    price: 180,
-    unit: "dozen",
-    image: "/images/poultry.jpg",
-    availability: "In Stock" as const,
-    subscription: false,
-  },
-  {
-    id: "seasonal-vegetables",
-    name: "Seasonal Vegetables",
-    category: "Vegetables",
-    description: "Fresh seasonal vegetables grown at our farm.",
-    price: 80,
-    unit: "kg",
-    image: "/images/hero-veggies.jpg",
-    availability: "Seasonal" as const,
-    subscription: false,
-  },
-];
+const FEATURED_COUNT = 4;
+
 const categories = ["All", "Dairy", "Vegetables", "Poultry", "Meat"];
 
-export default function Products() {
+function formatAvailability(
+  availability: "IN_STOCK" | "SEASONAL" | "OUT_OF_STOCK"
+) {
+  switch (availability) {
+    case "IN_STOCK":
+      return "In Stock" as const;
+
+    case "SEASONAL":
+      return "Seasonal" as const;
+
+    case "OUT_OF_STOCK":
+      return "Out of Stock" as const;
+  }
+}
+
+async function getHomepageProducts() {
+  const featured = await prisma.product.findMany({
+    where: {
+      isActive: true,
+      isFeatured: true,
+    },
+    include: {
+      category: true,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    take: FEATURED_COUNT,
+  });
+
+  let selected = featured;
+
+  // Fill any remaining slots with the newest active products, so the
+  // homepage always shows FEATURED_COUNT cards even if the admin
+  // hasn't marked (enough) products as featured yet.
+  if (selected.length < FEATURED_COUNT) {
+    const alreadyPicked = selected.map((product) => product.id);
+
+    const fallback = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        ...(alreadyPicked.length > 0 && {
+          id: {
+            notIn: alreadyPicked,
+          },
+        }),
+      },
+      include: {
+        category: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: FEATURED_COUNT - selected.length,
+    });
+
+    selected = [...selected, ...fallback];
+  }
+
+  return Promise.all(
+    selected.map(async (product) => ({
+      id: product.id,
+      name: product.name,
+      category: product.category.name,
+      description: product.description,
+      price: Number(product.price),
+      unit: product.unit,
+
+      image: product.imageUrl
+        ? await getS3Url(product.imageUrl)
+        : "/images/farm-hero-image.jpg",
+
+      availability: formatAvailability(product.availability),
+
+      // Only dairy currently offers a recurring delivery subscription.
+      subscription: product.category.name === "Dairy",
+    }))
+  );
+}
+
+export default async function Products() {
+  const products = await getHomepageProducts();
+
   return (
-    <section className="relative overflow-hidden bg-[#F8F5ED] px-6 py-24 md:py-32">
+    <section className="relative overflow-hidden bg-[#F8F5ED] px-6 py-16 md:py-24">
       {/* Decorative Background */}
       <div className="pointer-events-none absolute -right-32 top-20 h-80 w-80 rounded-full bg-green-900/5 blur-3xl" />
       <div className="pointer-events-none absolute -left-32 bottom-20 h-80 w-80 rounded-full bg-amber-700/5 blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl">
         {/* Section Heading */}
-        <div className="text-center">
+        <Reveal className="text-center">
           <div className="flex items-center justify-center gap-4">
             <span className="h-px w-10 bg-green-800/20" />
 
@@ -58,7 +110,7 @@ export default function Products() {
             <span className="h-px w-10 bg-green-800/20" />
           </div>
 
-          <h2 className="mx-auto mt-5 max-w-3xl font-[family-name:var(--font-dm-serif)] text-4xl leading-tight text-green-950 sm:text-5xl md:text-6xl">
+          <h2 className="mx-auto mt-5 max-w-3xl font-[family-name:var(--font-dm-serif)] text-3xl leading-tight text-green-950 sm:text-4xl md:text-5xl">
             Fresh from our farm,
             <span className="block text-green-700">
               made for your table.
@@ -69,7 +121,7 @@ export default function Products() {
             From fresh dairy to seasonal produce, discover carefully grown
             and raised products from Shiwa Krishi Farm.
           </p>
-        </div>
+        </Reveal>
 
         {/* Category Navigation */}
         <div className="mt-10 flex flex-wrap justify-center gap-2">
@@ -88,13 +140,19 @@ export default function Products() {
         </div>
 
         {/* Products Surface */}
-        <div className="mt-14 rounded-[2rem] border border-stone-200/70 bg-white/40 p-4 sm:p-6 md:p-8">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard key={product.name} product={product} />
-            ))}
-          </div>
-        </div>
+        <Reveal className="mt-14 rounded-[2rem] border border-stone-200/70 bg-white/40 p-4 sm:p-6 md:p-8">
+          {products.length === 0 ? (
+            <p className="py-10 text-center text-sm text-stone-500">
+              Products will appear here soon.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </Reveal>
 
         {/* Bottom CTA */}
         <div className="mt-10 flex justify-center">

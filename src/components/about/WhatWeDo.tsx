@@ -1,10 +1,11 @@
 import Image from "next/image";
+import Reveal from "@/components/ui/Reveal";
 
 const farmActivities = [
   {
     title: "Poultry & Eggs",
     description: "Fresh chicken and farm-raised eggs from our poultry.",
-    image: "/images/hero-poultry.jpg",
+    image: "/images/poultry.jpg",
   },
   {
     title: "Goats",
@@ -14,7 +15,7 @@ const farmActivities = [
   {
     title: "Fresh Milk",
     description: "Fresh cow milk produced and collected from our farm.",
-    image: "/images/hero-dairy.jpg",
+    image: "/images/hero-dairy.webp",
   },
   {
     title: "Seasonal Vegetables",
@@ -25,10 +26,10 @@ const farmActivities = [
 
 export default function WhatWeDo() {
   return (
-    <section className="bg-[#E8EDE3] px-6 py-24 md:py-32">
+    <section className="bg-[#E8EDE3] px-6 py-16 md:py-24">
       <div className="mx-auto max-w-7xl">
         {/* Heading */}
-        <div className="max-w-2xl">
+        <Reveal className="max-w-2xl">
           <div className="flex items-center gap-4">
             <span className="h-px w-10 bg-green-800/20" />
 
@@ -37,7 +38,7 @@ export default function WhatWeDo() {
             </span>
           </div>
 
-          <h2 className="mt-5 font-[family-name:var(--font-dm-serif)] text-4xl leading-tight sm:text-5xl">
+          <h2 className="mt-5 font-[family-name:var(--font-dm-serif)] text-3xl leading-tight sm:text-4xl md:text-5xl">
             From our farm to your table.
           </h2>
 
@@ -45,10 +46,10 @@ export default function WhatWeDo() {
             We raise and grow a range of farm products throughout the year,
             with availability naturally changing with the seasons.
           </p>
-        </div>
+        </Reveal>
 
         {/* Farm Activities */}
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {farmActivities.map((activity) => (
             <article
               key={activity.title}
@@ -74,7 +75,7 @@ export default function WhatWeDo() {
               </div>
             </article>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

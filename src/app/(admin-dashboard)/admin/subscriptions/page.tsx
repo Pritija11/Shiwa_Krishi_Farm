@@ -23,7 +23,7 @@ const validStatuses = [
   "CANCELLED",
 ] as const;
 
-const validFrequencies = ["DAILY", "WEEKLY"] as const;
+const validFrequencies = ["DAILY", "WEEKLY", "CUSTOM"] as const;
 
 export default async function SubscriptionsPage({
   searchParams,
@@ -63,7 +63,7 @@ export default async function SubscriptionsPage({
     }),
 
     ...(frequency !== "ALL" && {
-      frequency: frequency as "DAILY" | "WEEKLY",
+      frequency: frequency as "DAILY" | "WEEKLY" | "CUSTOM",
     }),
 
     ...(search && {
@@ -103,6 +103,7 @@ export default async function SubscriptionsPage({
     pausedSubscriptions,
     cancelledSubscriptions,
     subscriptions,
+    filteredTotal,
   ] = await Promise.all([
     prisma.milkSubscription.count(),
 
@@ -137,12 +138,19 @@ export default async function SubscriptionsPage({
       orderBy: {
         createdAt: "desc",
       },
+      include: {
+        product: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    }),
+
+    prisma.milkSubscription.count({
+      where,
     }),
   ]);
-
-  const filteredTotal = await prisma.milkSubscription.count({
-    where,
-  });
 
   const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
 
@@ -192,7 +200,7 @@ export default async function SubscriptionsPage({
       </div>
 
       {/* Summary */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-5">
         <SummaryCard
           title="Total"
           value={totalSubscriptions}
@@ -255,6 +263,8 @@ export default async function SubscriptionsPage({
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              basePath="/admin/subscriptions"
+              extraParams={{ search, status, frequency }}
             />
           </div>
         )}

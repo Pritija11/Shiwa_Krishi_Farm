@@ -13,6 +13,11 @@ export async function GET() {
       },
       include: {
         category: true,
+        images: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -33,6 +38,7 @@ export async function GET() {
 // POST /api/products
 export async function POST(request: Request) {
   try {
+
     // ---------------------------------------
     // Authentication
     // ---------------------------------------
@@ -74,9 +80,15 @@ export async function POST(request: Request) {
       price,
       unit,
       availability,
-      imageUrl,
+      images,
       categoryId,
     } = result.data;
+
+    const isActive =
+      typeof body.isActive === "boolean" ? body.isActive : true;
+
+    const isFeatured =
+      typeof body.isFeatured === "boolean" ? body.isFeatured : false;
 
     const category = await prisma.category.findUnique({
       where: {
@@ -103,11 +115,25 @@ export async function POST(request: Request) {
         price,
         unit,
         availability,
-        imageUrl: imageUrl || null,
         categoryId,
+        isActive,
+        isFeatured,
+        imageUrl: images[0],
+
+        images: {
+          create: images.map((imageUrl, index) => ({
+            imageUrl,
+            sortOrder: index,
+          })),
+        },
       },
       include: {
         category: true,
+        images: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
       },
     });
 

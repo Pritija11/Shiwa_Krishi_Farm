@@ -1,28 +1,36 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { contactSchema } from "@/validations/contact";
 
 // POST /api/contact
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const { name, phone, email, subject, message } = body;
+    const result = contactSchema.safeParse(body);
 
-    if (!name || !message) {
+    if (!result.success) {
+      const errors = result.error.flatten().fieldErrors;
+
       return NextResponse.json(
-        { error: "Name and message are required" },
+        {
+          error: "Validation failed",
+          fields: errors,
+        },
         { status: 400 },
       );
     }
 
+    const { name, phone, email, subject, message } = result.data;
+
     const contactMessage = await prisma.contactMessage.create({
       data: {
-        name: name.trim(),
-        phone: phone?.trim() || null,
-        email: email?.trim() || null,
-        subject: subject?.trim() || null,
-        message: message.trim(),
+        name,
+        phone: phone ?? null,
+        email: email ?? null,
+        subject: subject ?? null,
+        message,
       },
     });
 
