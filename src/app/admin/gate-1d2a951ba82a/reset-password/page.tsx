@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
+import { ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/admin-routes";
 import ResetPasswordForm from "@/components/admin/ResetPasswordForm";
 import { findUserByResetToken } from "./action";
 
@@ -52,7 +53,7 @@ export default async function ResetPasswordPage({
           ) : (
             <div className="mt-8">
               <Link
-                href="/admin/forgot-password"
+                href={ADMIN_FORGOT_PASSWORD_PATH}
                 className="block w-full rounded-full bg-green-900 px-6 py-3.5 text-center text-sm font-medium text-white transition hover:bg-green-800"
               >
                 Request a new link

@@ -16,7 +16,7 @@ import { createWhatsAppLinkUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with Shiwa Krishi Farm by phone, WhatsApp, or our contact form. Find our farm location, working hours, and delivery areas.",
+    "Get in touch with Shiwa Krishi Farm in Gokarneshwor, Bagmati Province by phone, WhatsApp, or our contact form. Find our farm location, working hours, and delivery areas.",
 };
 
 export default async function ContactPage() {

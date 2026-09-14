@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { ADMIN_RESET_PASSWORD_PATH } from "@/lib/admin-routes";
 import { forgotPasswordSchema } from "@/validations/auth";
 import { generateResetToken, RESET_TOKEN_TTL_MS } from "@/lib/password-reset";
 import {
@@ -92,7 +93,7 @@ export async function requestPasswordReset(
   });
 
   const baseUrl = await getBaseUrl();
-  const resetUrl = `${baseUrl}/admin/reset-password?token=${rawToken}`;
+  const resetUrl = `${baseUrl}${ADMIN_RESET_PASSWORD_PATH}?token=${rawToken}`;
 
   try {
     await sendEmail(

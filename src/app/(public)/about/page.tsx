@@ -8,7 +8,7 @@ import AboutCTA from "@/components/about/AboutCTA";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Learn about Shiwa Krishi Farm's story, our values, and how we raise our poultry, goats, and dairy, and grow our organic vegetables.",
+    "Learn about Shiwa Krishi Farm's story and values, and how we raise our poultry, goats, and dairy, and grow our organic vegetables in Gokarneshwor, Bagmati Province.",
 };
 
 export default function AboutPage() {

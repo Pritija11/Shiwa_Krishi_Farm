@@ -6,7 +6,7 @@ import Reveal from "@/components/ui/Reveal";
 
 const FEATURED_COUNT = 4;
 
-const categories = ["All", "Dairy", "Vegetables", "Poultry", "Meat"];
+const categories = ["All", "Dairy", "Vegetables", "Poultry", "Goats"];
 
 function formatAvailability(
   availability: "IN_STOCK" | "SEASONAL" | "OUT_OF_STOCK"

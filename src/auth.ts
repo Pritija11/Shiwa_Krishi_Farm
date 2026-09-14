@@ -1,14 +1,22 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
+import { NextResponse } from "next/server";
 import type { NextAuthConfig } from "next-auth";
 
 import { prisma } from "@/lib/prisma";
+import {
+  ADMIN_LOGIN_PATH,
+  ADMIN_FORGOT_PASSWORD_PATH,
+  ADMIN_RESET_PASSWORD_PATH,
+} from "@/lib/admin-routes";
+
+export { ADMIN_LOGIN_PATH };
 
 const PUBLIC_ADMIN_ROUTES = [
-  "/admin/login",
-  "/admin/forgot-password",
-  "/admin/reset-password",
+  ADMIN_LOGIN_PATH,
+  ADMIN_FORGOT_PASSWORD_PATH,
+  ADMIN_RESET_PASSWORD_PATH,
 ];
 
 export const authConfig = {
@@ -19,7 +27,7 @@ export const authConfig = {
   },
 
   pages: {
-    signIn: "/admin/login",
+    signIn: ADMIN_LOGIN_PATH,
   },
 
   providers: [
@@ -119,7 +127,16 @@ export const authConfig = {
         return true;
       }
 
-      return auth?.user?.role === "ADMIN";
+      if (auth?.user?.role === "ADMIN") {
+        return true;
+      }
+
+      // Unauthenticated visitors hitting a protected /admin route (e.g. bare
+      // /admin) are bounced to the public homepage rather than the login
+      // page, so the admin panel isn't discoverable by random visitors.
+      // The real login path itself stays reachable directly (see
+      // PUBLIC_ADMIN_ROUTES above) for the actual admin to sign in.
+      return NextResponse.redirect(new URL("/", request.url));
     },
   },
 } satisfies NextAuthConfig;

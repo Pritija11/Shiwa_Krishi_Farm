@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth, ADMIN_LOGIN_PATH } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ChangePasswordForm from "@/components/admin/ChangePasswordForm";
@@ -7,7 +7,7 @@ export default async function AdminProfilePage() {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/admin/login");
+    redirect(ADMIN_LOGIN_PATH);
   }
 
   const user = await prisma.user.findUnique({
