@@ -67,9 +67,9 @@ export default function AdminSidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-green-900/10 bg-green-950 lg:block">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="border-b border-white/10 px-7 py-7">
+        <div className="border-b border-white/10 px-7 py-6">
           <Link href="/admin">
-            <p className="font-[family-name:var(--font-dm-serif)] text-2xl text-white">
+            <p className="font-[family-name:var(--font-dm-serif)] text-xl text-white">
               Shiwa Krishi
             </p>
 

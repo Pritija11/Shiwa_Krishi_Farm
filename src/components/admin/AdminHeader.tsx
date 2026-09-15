@@ -11,12 +11,12 @@ export default async function AdminHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-green-900/10 bg-[#F8F5ED]/95 backdrop-blur">
-      <div className="flex h-20 items-center justify-between px-6 lg:px-8">
+      <div className="flex h-16 items-center justify-between px-6 lg:px-8">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-green-900/50">
             Welcome
           </p>
-          <h1 className="mt-1 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950 sm:text-3xl">
+          <h1 className="mt-0.5 font-[family-name:var(--font-dm-serif)] text-lg text-green-950 sm:text-xl">
             {name}
           </h1>
         </div>

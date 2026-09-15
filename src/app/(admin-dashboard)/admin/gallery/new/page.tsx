@@ -38,6 +38,14 @@ export default function NewGalleryItemPage() {
   const [fieldErrors, setFieldErrors] =
     useState<ValidationFields>({});
 
+  function showError(message: string) {
+    setError(message);
+
+    setTimeout(() => {
+      setError("");
+    }, 2000);
+  }
+
   function handleChange(
     event: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -70,7 +78,7 @@ export default function NewGalleryItemPage() {
     const validationError = validateGalleryMediaFile(file);
 
     if (validationError) {
-      setError(validationError);
+      showError(validationError);
       return;
     }
 
@@ -105,7 +113,7 @@ export default function NewGalleryItemPage() {
     } catch (error) {
       console.error("Gallery media upload error:", error);
 
-      setError(
+      showError(
         error instanceof Error
           ? error.message
           : "Failed to upload media."
@@ -127,7 +135,7 @@ export default function NewGalleryItemPage() {
     setFieldErrors({});
 
     if (!selectedFile) {
-      setError("Please select an image or video.");
+      showError("Please select an image or video.");
       setLoading(false);
       return;
     }
@@ -167,9 +175,9 @@ export default function NewGalleryItemPage() {
       if (!response.ok) {
         if (data.fields) {
           setFieldErrors(data.fields);
-          setError("Please fix the highlighted fields.");
+          showError("Please fix the highlighted fields.");
         } else {
-          setError(
+          showError(
             data.error || "Failed to create gallery item."
           );
         }
@@ -182,7 +190,7 @@ export default function NewGalleryItemPage() {
     } catch (error) {
       console.error("Failed to create gallery item:", error);
 
-      setError(
+      showError(
         error instanceof Error
           ? error.message
           : "Failed to create gallery item."
@@ -208,7 +216,7 @@ export default function NewGalleryItemPage() {
           Gallery
         </p>
 
-        <h1 className="mt-2 font-[family-name:var(--font-dm-serif)] text-4xl text-green-950 sm:text-5xl">
+        <h1 className="mt-2 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950 sm:text-3xl">
           Add Gallery Item
         </h1>
 
@@ -242,7 +250,7 @@ export default function NewGalleryItemPage() {
               maxLength={100}
               placeholder="e.g. Fresh morning at the farm"
               className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
-                fieldErrors.title
+                fieldErrors.title?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}
@@ -274,7 +282,7 @@ export default function NewGalleryItemPage() {
               onChange={handleChange}
               required
               className={`mt-2 w-full rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
-                fieldErrors.category
+                fieldErrors.category?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}
@@ -348,7 +356,7 @@ export default function NewGalleryItemPage() {
               rows={4}
               placeholder="Add a short description..."
               className={`mt-2 w-full resize-none rounded-xl border bg-[#F8F5ED] px-4 py-3 text-sm outline-none transition focus:border-green-700 ${
-                fieldErrors.description
+                fieldErrors.description?.length
                   ? "border-red-400"
                   : "border-stone-200"
               }`}

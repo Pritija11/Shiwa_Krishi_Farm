@@ -61,7 +61,7 @@ export default function EditProductPage() {
           Products
         </p>
 
-        <h1 className="mt-2 font-[family-name:var(--font-dm-serif)] text-3xl text-green-950 sm:text-4xl lg:text-5xl">
+        <h1 className="mt-2 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950 sm:text-3xl">
           Edit Product
         </h1>
 

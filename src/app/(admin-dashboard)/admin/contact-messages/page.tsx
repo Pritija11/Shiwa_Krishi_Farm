@@ -138,7 +138,7 @@ export default async function ContactMessagesPage({
           Customer Activity
         </p>
 
-        <h1 className="mt-2 font-[family-name:var(--font-dm-serif)] text-4xl text-green-950 sm:text-5xl">
+        <h1 className="mt-2 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950 sm:text-3xl">
           Contact Messages
         </h1>
 

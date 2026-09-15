@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { resetPassword } from "@/app/admin/gate-1d2a951ba82a/reset-password/action";
@@ -22,6 +22,26 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     initialState
   );
   const [showPassword, setShowPassword] = useState(false);
+
+  // Tracks which error has already been auto-dismissed. A fresh submission
+  // always produces a new `state` object, so a new error becomes visible
+  // again without needing to explicitly "undismiss" anything.
+  const [dismissedState, setDismissedState] = useState<typeof state | null>(
+    null
+  );
+  const isErrorVisible = Boolean(state.error) && state !== dismissedState;
+
+  useEffect(() => {
+    if (!state.error) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setDismissedState(state);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [state]);
 
   if (state.success) {
     return (
@@ -107,7 +127,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         />
       </div>
 
-      {state.error && (
+      {isErrorVisible && (
         <div
           role="alert"
           className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"

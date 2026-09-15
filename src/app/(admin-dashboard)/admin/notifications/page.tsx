@@ -145,7 +145,7 @@ export default function NotificationsPage() {
             Admin
           </p>
 
-          <h1 className="mt-1 font-[family-name:var(--font-dm-serif)] text-3xl text-green-950">
+          <h1 className="mt-1 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950">
             Notifications
           </h1>
 

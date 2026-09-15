@@ -116,6 +116,10 @@ export default function CategoryForm({
           ? error.message
           : `Failed to ${mode === "create" ? "create" : "update"} category.`
       );
+
+      setTimeout(() => {
+        setError("");
+      }, 2000);
     } finally {
       setLoading(false);
     }

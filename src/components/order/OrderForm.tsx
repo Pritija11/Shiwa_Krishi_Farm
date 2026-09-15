@@ -50,7 +50,7 @@ export default function OrderForm({
 
     setTimeout(() => {
       setToast(null);
-    }, 3000);
+    }, 2000);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
