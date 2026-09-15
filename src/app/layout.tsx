@@ -3,6 +3,7 @@ import { DM_Serif_Display, Manrope } from "next/font/google";
 import "./globals.css";
 import { getSiteUrl } from "@/lib/site-url";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import LocalBusinessJsonLd from "@/components/seo/LocalBusinessJsonLd";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | Shiwa Krishi Farm",
   },
   description:
-    "Fresh farm products including poultry, goat meat, fresh cow milk, and organic vegetables.",
+    "Fresh, organic farm products including poultry, goat meat, cow milk, and vegetables from Shiwa Krishi Farm in Gokarneshwor, Bagmati Province, Nepal.",
 };
 
 export default function RootLayout({
@@ -39,6 +40,8 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+
+        <LocalBusinessJsonLd />
 
         {gaMeasurementId && (
           <GoogleAnalytics measurementId={gaMeasurementId} />

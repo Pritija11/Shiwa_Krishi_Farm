@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 type Category = {
   id: string;
   name: string;
+  slug: string;
 };
 
 type CategoryFilterProps = {
@@ -70,13 +71,13 @@ export default function CategoryFilter({
           </button>
 
           {categories.map((category) => {
-            const isSelected = selectedCategory === category.id;
+            const isSelected = selectedCategory === category.slug;
 
             return (
               <button
                 key={category.id}
                 type="button"
-                onClick={() => updateParams({ category: category.id })}
+                onClick={() => updateParams({ category: category.slug })}
                 className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition ${
                   isSelected
                     ? "bg-green-900 text-white"

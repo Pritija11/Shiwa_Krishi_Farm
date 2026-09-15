@@ -22,10 +22,10 @@ const categories = [
     href: "/products?category=poultry",
   },
   {
-    name: "Goat & Meat",
-    description: "Farm-raised meat, carefully sourced and prepared.",
+    name: "Goats",
+    description: "Farm-raised goat meat, carefully sourced and prepared.",
     image: "/images/hero-goats.jpg",
-    href: "/products?category=meat",
+    href: "/products?category=goats",
   },
 ];
 

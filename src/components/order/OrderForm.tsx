@@ -217,7 +217,7 @@ export default function OrderForm({
               htmlFor="name"
               className="text-sm font-medium text-green-950"
             >
-              Full Name
+              Full Name <span className="text-red-600">*</span>
             </label>
 
             <input
@@ -242,7 +242,7 @@ export default function OrderForm({
               htmlFor="phone"
               className="text-sm font-medium text-green-950"
             >
-              Phone Number
+              Phone Number <span className="text-red-600">*</span>
             </label>
 
             <input
@@ -291,7 +291,7 @@ export default function OrderForm({
               htmlFor="product"
               className="text-sm font-medium text-green-950"
             >
-              Product
+              Product <span className="text-red-600">*</span>
             </label>
 
             <select
@@ -325,7 +325,7 @@ export default function OrderForm({
               htmlFor="quantity"
               className="text-sm font-medium text-green-950"
             >
-              Quantity
+              Quantity <span className="text-red-600">*</span>
             </label>
 
             <input
@@ -352,7 +352,7 @@ export default function OrderForm({
               htmlFor="address"
               className="text-sm font-medium text-green-950"
             >
-              Delivery Address / Area
+              Delivery Address / Area <span className="text-red-600">*</span>
             </label>
 
             <input
@@ -377,7 +377,7 @@ export default function OrderForm({
               htmlFor="preferredDate"
               className="text-sm font-medium text-green-950"
             >
-              Preferred Date
+              Preferred Date <span className="text-red-600">*</span>
             </label>
 
             <input

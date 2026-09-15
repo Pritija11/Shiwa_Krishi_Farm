@@ -3,8 +3,9 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { resetPassword } from "@/app/admin/reset-password/action";
+import { resetPassword } from "@/app/admin/gate-1d2a951ba82a/reset-password/action";
 import { PASSWORD_REQUIREMENTS } from "@/validations/auth";
+import { ADMIN_LOGIN_PATH } from "@/lib/admin-routes";
 
 const initialState = {
   success: false,
@@ -34,7 +35,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         </div>
 
         <Link
-          href="/admin/login"
+          href={ADMIN_LOGIN_PATH}
           className="block w-full rounded-full bg-green-900 px-6 py-3.5 text-center text-sm font-medium text-white transition hover:bg-green-800"
         >
           Go to Login

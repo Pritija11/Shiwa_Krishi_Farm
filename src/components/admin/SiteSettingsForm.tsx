@@ -104,7 +104,7 @@ export default function SiteSettingsForm({
             General Information
           </p>
 
-          <h2 className="mt-2 text-2xl text-green-950">
+          <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950">
             Contact Details
           </h2>
 
@@ -207,7 +207,7 @@ export default function SiteSettingsForm({
             Business & Delivery
           </p>
 
-          <h2 className="mt-2 text-2xl text-green-950">
+          <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950">
             Farm Information
           </h2>
 
@@ -361,7 +361,7 @@ export default function SiteSettingsForm({
             Social & Messaging
           </p>
 
-          <h2 className="mt-2 text-2xl text-green-950">
+          <h2 className="mt-2 font-[family-name:var(--font-dm-serif)] text-2xl text-green-950">
             Social Links
           </h2>
 

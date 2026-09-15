@@ -3,7 +3,8 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { loginAdmin } from "@/app/admin/login/action";
+import { loginAdmin } from "@/app/admin/gate-1d2a951ba82a/action";
+import { ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/admin-routes";
 
 const initialState = {
   success: false,
@@ -48,7 +49,7 @@ export default function AdminLoginForm() {
           </label>
 
           <Link
-            href="/admin/forgot-password"
+            href={ADMIN_FORGOT_PASSWORD_PATH}
             className="text-xs font-medium text-green-800 hover:underline"
           >
             Forgot password?

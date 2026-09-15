@@ -185,7 +185,7 @@ export default async function ProductDetailPage({
             <ChevronRight size={12} />
 
             <Link
-              href={`/products?category=${product.categoryId}`}
+              href={`/products?category=${product.category.slug}`}
               className="transition hover:text-green-800"
             >
               {product.category.name}

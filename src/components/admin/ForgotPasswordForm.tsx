@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { requestPasswordReset } from "@/app/admin/forgot-password/action";
+import { requestPasswordReset } from "@/app/admin/gate-1d2a951ba82a/forgot-password/action";
+import { ADMIN_LOGIN_PATH } from "@/lib/admin-routes";
 
 const initialState = {
   submitted: false,
@@ -28,7 +29,7 @@ export default function ForgotPasswordForm() {
         </div>
 
         <Link
-          href="/admin/login"
+          href={ADMIN_LOGIN_PATH}
           className="block text-center text-sm font-medium text-green-800 hover:underline"
         >
           Back to login
@@ -76,7 +77,7 @@ export default function ForgotPasswordForm() {
       </button>
 
       <Link
-        href="/admin/login"
+        href={ADMIN_LOGIN_PATH}
         className="block text-center text-sm font-medium text-green-800 hover:underline"
       >
         Back to login

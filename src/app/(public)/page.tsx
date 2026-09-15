@@ -8,9 +8,9 @@ import WhyChooseUs from "@/components/home/WhyChooseUs";
 import OrderCTA from "@/components/home/OrderCTA";
 
 export const metadata: Metadata = {
-  title: "Fresh Farm Products in Nepal",
+  title: "Fresh Farm Products in Gokarneshwor, Nepal",
   description:
-    "Shiwa Krishi Farm grows and raises fresh, organic poultry, goat meat, cow milk, and vegetables. Order directly or subscribe to daily milk delivery.",
+    "Shiwa Krishi Farm grows and raises fresh, organic poultry, goat meat, cow milk, and vegetables in Gokarneshwor, Bagmati Province. Order directly or subscribe to daily milk delivery across Kathmandu Valley.",
 };
 
 export default function Home() {
