@@ -57,7 +57,7 @@ export default async function EnquiryDetailsPage({
 
         <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="font-[family-name:var(--font-dm-serif)] text-4xl text-green-950 sm:text-5xl">
+            <h1 className="font-[family-name:var(--font-dm-serif)] text-2xl text-green-950 sm:text-3xl">
               {enquiry.customerName}
             </h1>
 

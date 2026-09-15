@@ -52,6 +52,14 @@ export default function EditGalleryForm({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
+  function showError(message: string) {
+    setError(message);
+
+    setTimeout(() => {
+      setError("");
+    }, 2000);
+  }
+
   useEffect(() => {
     return () => {
       if (previewUrl.startsWith("blob:")) {
@@ -72,7 +80,7 @@ export default function EditGalleryForm({
     const validationError = validateGalleryMediaFile(selectedFile);
 
     if (validationError) {
-      setError(validationError);
+      showError(validationError);
       return;
     }
 
@@ -93,7 +101,7 @@ export default function EditGalleryForm({
     setError("");
 
     if (!title.trim()) {
-      setError("Title is required.");
+      showError("Title is required.");
       return;
     }
 
@@ -143,7 +151,7 @@ export default function EditGalleryForm({
       router.push("/admin/gallery");
       router.refresh();
     } catch (error) {
-      setError(
+      showError(
         error instanceof Error
           ? error.message
           : "Something went wrong."

@@ -67,6 +67,10 @@ export default function SiteSettingsForm({
 
       setSuccessMessage("Site settings saved successfully.");
 
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 2000);
+
       setFormData({
         phone: data.phone ?? "",
         whatsapp: data.whatsapp ?? "",
@@ -90,6 +94,10 @@ export default function SiteSettingsForm({
           ? error.message
           : "Something went wrong. Please try again."
       );
+
+      setTimeout(() => {
+        setErrorMessage("");
+      }, 2000);
     } finally {
       setIsSaving(false);
     }

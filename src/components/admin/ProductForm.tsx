@@ -89,6 +89,14 @@ export default function ProductForm({
   const [fieldErrors, setFieldErrors] =
     useState<ValidationFields>({});
 
+  function showError(message: string) {
+    setError(message);
+
+    setTimeout(() => {
+      setError("");
+    }, 2000);
+  }
+
   // Fetch categories
   useEffect(() => {
     async function fetchCategories() {
@@ -104,7 +112,7 @@ export default function ProductForm({
         setCategories(data);
       } catch (error) {
         console.error(error);
-        setError("Failed to load categories.");
+        showError("Failed to load categories.");
       } finally {
         setLoadingCategories(false);
       }
@@ -148,7 +156,7 @@ export default function ProductForm({
     const remainingSlots = 5 - images.length;
 
     if (files.length > remainingSlots) {
-      setError(
+      showError(
         `You can add ${remainingSlots} more image${
           remainingSlots === 1 ? "" : "s"
         }.`
@@ -162,14 +170,14 @@ export default function ProductForm({
           file.type
         )
       ) {
-        setError(
+        showError(
           "Only JPG, PNG, and WEBP images are allowed."
         );
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        setError(
+        showError(
           `Image "${file.name}" must be smaller than 5MB.`
         );
         return;
@@ -240,7 +248,7 @@ export default function ProductForm({
     } catch (error) {
       console.error("Image crop error:", error);
 
-      setError(
+      showError(
         "Failed to crop image. Please try again."
       );
     }
@@ -313,7 +321,7 @@ export default function ProductForm({
     } catch (error) {
       console.error("Image upload error:", error);
 
-      setError(
+      showError(
         error instanceof Error
           ? error.message
           : "Failed to upload images."
@@ -336,13 +344,13 @@ export default function ProductForm({
 
     // At least one image is required
     if (images.length === 0) {
-      setError("Please add at least one product image.");
+      showError("Please add at least one product image.");
       return;
     }
 
     // Do not submit while another image is being cropped
     if (pendingFiles.length > 0 || cropImage) {
-      setError(
+      showError(
         "Please finish cropping your selected images first."
       );
       return;
@@ -385,11 +393,11 @@ export default function ProductForm({
       if (!response.ok) {
         if (data.fields) {
           setFieldErrors(data.fields);
-          setError(
+          showError(
             "Please fix the highlighted fields."
           );
         } else {
-          setError(
+          showError(
             data.error ||
               `Failed to ${
                 mode === "create" ? "create" : "update"
@@ -413,7 +421,7 @@ export default function ProductForm({
     } catch (error) {
       console.error(error);
 
-      setError(
+      showError(
         error instanceof Error
           ? error.message
           : `Failed to ${
