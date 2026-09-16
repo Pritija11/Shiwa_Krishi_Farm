@@ -29,7 +29,11 @@ export default function Navbar() {
 
   return (
     <header className="fixed left-0 top-5 z-50 w-full px-4">
-      <nav className="mx-auto max-w-6xl rounded-full bg-white/95 shadow-lg backdrop-blur-sm">
+      <nav
+        className={`mx-auto max-w-6xl bg-white/95 shadow-lg backdrop-blur-sm transition-[border-radius] duration-200 ${
+          isOpen ? "rounded-[2rem]" : "rounded-full"
+        }`}
+      >
         {/* Main Navbar */}
         <div className="flex h-16 items-center justify-between px-5 sm:px-6">
           {/* Logo */}
