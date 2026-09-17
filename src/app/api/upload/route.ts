@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { s3 } from "@/lib/s3";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 MB
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
 
 const ALLOWED_FOLDERS = ["products", "gallery"] as const;
 
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
 
     if (isVideo && file.size > MAX_VIDEO_SIZE) {
       return Response.json(
-        { error: "Video must be smaller than 50MB." },
+        { error: "Video must be smaller than 100MB." },
         { status: 400 }
       );
     }

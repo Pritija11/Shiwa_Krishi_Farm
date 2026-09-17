@@ -323,7 +323,8 @@ export default function NewGalleryItemPage() {
             />
 
             <p className="mt-2 text-xs text-stone-500">
-              Images up to 5MB. Videos up to 50MB.
+              Images up to 5MB. Videos up to 100MB (roughly 30-45 seconds
+              at normal phone quality).
             </p>
 
             {mediaType && (

@@ -2,10 +2,29 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { enquirySchema } from "@/validations/enquiry";
 import { createNotification } from "@/lib/notifications";
+import {
+  checkPublicFormRateLimit,
+  getClientIpFromRequest,
+} from "@/lib/public-form-rate-limit";
 
 // POST /api/enquiries
 export async function POST(request: Request) {
   try {
+    const ip = getClientIpFromRequest(request);
+    const rateLimit = checkPublicFormRateLimit(`${ip}:enquiry`, {
+      max: 5,
+      windowMs: 10 * 60 * 1000,
+    });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: `Too many enquiries submitted. Please try again in ${rateLimit.retryAfterMinutes} minute(s).`,
+        },
+        { status: 429 },
+      );
+    }
+
     let body;
 
     try {
