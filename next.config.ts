@@ -25,6 +25,16 @@ const nextConfig: NextConfig = {
         hostname: "shiwa-krishi-farm-media.s3.ap-south-1.amazonaws.com",
         pathname: "/gallery/**",
       },
+      {
+        protocol: "https",
+        hostname: "shiwa-krishi-farm-media.s3.ap-south-1.amazonaws.com",
+        pathname: "/hero/**",
+      },
+      {
+        protocol: "https",
+        hostname: "shiwa-krishi-farm-media.s3.ap-south-1.amazonaws.com",
+        pathname: "/categories/**",
+      },
     ],
   },
 };

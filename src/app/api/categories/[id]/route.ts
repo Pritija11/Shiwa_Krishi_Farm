@@ -51,7 +51,7 @@ export async function PUT(request: Request, context: RouteContext) {
       );
     }
 
-    const { name, slug, description } = result.data;
+    const { name, slug, description, imageUrl } = result.data;
 
     const conflictingCategory = await prisma.category.findFirst({
       where: {
@@ -77,6 +77,7 @@ export async function PUT(request: Request, context: RouteContext) {
         name,
         slug,
         description: description || null,
+        imageUrl: imageUrl || null,
       },
     });
 

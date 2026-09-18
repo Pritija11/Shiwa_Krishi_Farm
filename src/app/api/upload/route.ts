@@ -5,7 +5,7 @@ import { s3 } from "@/lib/s3";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
 
-const ALLOWED_FOLDERS = ["products", "gallery"] as const;
+const ALLOWED_FOLDERS = ["products", "gallery", "hero", "categories"] as const;
 
 const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -17,6 +17,21 @@ const ALLOWED_VIDEO_TYPES = new Set([
   "video/mp4",
   "video/webm",
 ]);
+
+// Some browsers/OSes report an empty or generic MIME type (e.g. after a
+// file has been re-saved or transferred without metadata), so extension is
+// checked as a fallback rather than trusting file.type alone.
+const IMAGE_EXTENSION_TYPES: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+};
+
+const VIDEO_EXTENSION_TYPES: Record<string, string> = {
+  mp4: "video/mp4",
+  webm: "video/webm",
+};
 
 function getFileExtension(file: File) {
   const extension = file.name.split(".").pop()?.toLowerCase();
@@ -98,18 +113,30 @@ export async function POST(request: Request) {
       );
     }
 
-    const isImage = ALLOWED_IMAGE_TYPES.has(file.type);
-    const isVideo = ALLOWED_VIDEO_TYPES.has(file.type);
+    const isImage =
+      ALLOWED_IMAGE_TYPES.has(file.type) ||
+      extension in IMAGE_EXTENSION_TYPES;
+    const isVideo =
+      ALLOWED_VIDEO_TYPES.has(file.type) ||
+      extension in VIDEO_EXTENSION_TYPES;
 
     if (!isImage && !isVideo) {
       return Response.json(
         {
           error:
-            "Unsupported file type. Allowed images: JPG, PNG, WEBP. Allowed videos: MP4, WEBM.",
+            "Unsupported file type. Allowed images: JPG, JPEG, PNG, WEBP. Allowed videos: MP4, WEBM.",
         },
         { status: 400 }
       );
     }
+
+    // Trust the browser-reported type when present; otherwise fall back to
+    // the extension so S3 still stores a correct Content-Type.
+    const contentType =
+      file.type ||
+      IMAGE_EXTENSION_TYPES[extension] ||
+      VIDEO_EXTENSION_TYPES[extension] ||
+      "application/octet-stream";
 
     if (isImage && file.size > MAX_IMAGE_SIZE) {
       return Response.json(
@@ -147,7 +174,7 @@ export async function POST(request: Request) {
         Bucket: process.env.AWS_S3_BUCKET_NAME,
         Key: key,
         Body: buffer,
-        ContentType: file.type,
+        ContentType: contentType,
         ContentLength: buffer.length,
       })
     );
