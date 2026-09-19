@@ -5,6 +5,11 @@ import { prisma } from "@/lib/prisma";
 // GET /api/notifications
 export async function GET(request: Request) {
   try {
+
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
     const session = await auth();
 
     if (session?.user?.role !== "ADMIN") {
@@ -60,6 +65,11 @@ export async function GET(request: Request) {
 // PATCH /api/notifications
 export async function PATCH(request: Request) {
   try {
+
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
     const session = await auth();
 
     if (session?.user?.role !== "ADMIN") {

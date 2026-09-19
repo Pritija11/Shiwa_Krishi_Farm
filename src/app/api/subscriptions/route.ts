@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { subscriptionSchema } from "@/validations/subscription";
@@ -129,6 +131,40 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { error: "Failed to create milk subscription" },
+      { status: 500 },
+    );
+  }
+}
+
+
+// GET /api/subscriptions
+export async function GET() {
+  try {
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
+    const session = await auth();
+
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const subscriptions = await prisma.milkSubscription.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(subscriptions);
+  } catch (error) {
+    console.error("Failed to fetch milk subscriptions:", error);
+
+    return NextResponse.json(
+      { error: "Failed to fetch milk subscriptions" },
       { status: 500 },
     );
   }

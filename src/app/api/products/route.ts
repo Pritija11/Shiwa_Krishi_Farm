@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/validations/product";
 
 // GET /api/products
@@ -37,6 +38,11 @@ export async function GET() {
 // POST /api/products
 export async function POST(request: Request) {
   try {
+
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
     const session = await auth();
 
     if (session?.user?.role !== "ADMIN") {

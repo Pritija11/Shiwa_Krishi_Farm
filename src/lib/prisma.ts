@@ -1,8 +1,19 @@
+import fs from "fs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
+const rdsCertPath = "/etc/ssl/rds/global-bundle.pem";
+
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
+  ...(fs.existsSync(rdsCertPath)
+    ? {
+        ssl: {
+          ca: fs.readFileSync(rdsCertPath),
+          rejectUnauthorized: true,
+        },
+      }
+    : {}),
 });
 
 const globalForPrisma = globalThis as unknown as {

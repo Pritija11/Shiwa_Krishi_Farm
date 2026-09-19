@@ -113,9 +113,14 @@ export const authConfig = {
 
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
-      const isAdminRoute = pathname.startsWith("/admin");
 
-      if (!isAdminRoute) {
+
+
+
+      const isAdminRoute = pathname.startsWith("/admin");
+      const isLoginRoute = pathname === "/admin/login";
+
+      if (!isAdminRoute || isLoginRoute) {
         return true;
       }
 

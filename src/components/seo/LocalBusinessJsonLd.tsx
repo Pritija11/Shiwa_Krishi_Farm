@@ -2,9 +2,16 @@ import { prisma } from "@/lib/prisma";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default async function LocalBusinessJsonLd() {
-  const settings = await prisma.siteSettings.findUnique({
-    where: { id: "site-settings" },
-  });
+  let settings = null;
+
+  try {
+    settings = await prisma.siteSettings.findUnique({
+      where: { id: "site-settings" },
+    });
+  } catch (error) {
+    console.error("LocalBusinessJsonLd: could not load site settings, skipping JSON-LD.", error);
+    return null;
+  }
 
   if (!settings) {
     return null;

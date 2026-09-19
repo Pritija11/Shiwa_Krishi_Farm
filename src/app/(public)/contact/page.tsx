@@ -11,7 +11,12 @@ import {
 } from "lucide-react";
 import ContactForm from "@/components/contact/ContactForm";
 import Reveal from "@/components/ui/Reveal";
-import { createWhatsAppLinkUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
+import {
+  createWhatsAppLinkUrl,
+  isWhatsAppConfigured,
+} from "@/lib/whatsapp";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Contact Us",

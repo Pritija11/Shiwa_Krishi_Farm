@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { getS3Url } from "@/lib/s3-url";
 import { s3 } from "@/lib/s3";
-import { auth } from "@/auth";
 import { productSchema } from "@/validations/product";
 
 // GET /api/products/[id]
@@ -64,6 +64,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+
+    // ---------------------------------------
+    // Authentication
+    // ---------------------------------------
+
+
     const session = await auth();
 
     if (session?.user?.role !== "ADMIN") {

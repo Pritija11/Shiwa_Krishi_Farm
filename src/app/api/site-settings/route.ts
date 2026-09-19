@@ -4,6 +4,24 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { siteSettingsSchema } from "@/validations/site-settings";
 
+// GET /api/site-settings
+export async function GET() {
+  try {
+    const settings = await prisma.siteSettings.findUnique({
+      where: { id: "site-settings" },
+    });
+
+    return NextResponse.json(settings);
+  } catch (error) {
+    console.error("Failed to fetch site settings:", error);
+
+    return NextResponse.json(
+      { error: "Failed to fetch site settings" },
+      { status: 500 }
+    );
+  }
+}
+
 // PUT /api/site-settings
 export async function PUT(request: Request) {
   try {
