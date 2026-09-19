@@ -165,13 +165,15 @@ export default function ProductForm({
     }
 
     for (const file of files) {
-      if (
-        !["image/jpeg", "image/png", "image/webp"].includes(
-          file.type
-        )
-      ) {
+      const extension = file.name.split(".").pop()?.toLowerCase();
+
+      const isAcceptedImage =
+        ["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+        (extension && ["jpg", "jpeg", "png", "webp"].includes(extension));
+
+      if (!isAcceptedImage) {
         showError(
-          "Only JPG, PNG, and WEBP images are allowed."
+          "Only JPG, JPEG, PNG, and WEBP images are allowed."
         );
         return;
       }

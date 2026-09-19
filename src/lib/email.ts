@@ -12,8 +12,14 @@ export async function sendEmail(
   subject: string,
   body: string
 ) {
+  const fromEmail = process.env.SES_FROM_EMAIL;
+
+  if (!fromEmail) {
+    throw new Error("SES_FROM_EMAIL is not set.");
+  }
+
   const command = new SendEmailCommand({
-    FromEmailAddress: "pritijaghising19@gmail.com",
+    FromEmailAddress: fromEmail,
     Destination: {
       ToAddresses: [to],
     },
