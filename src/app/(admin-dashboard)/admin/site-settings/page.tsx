@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getS3Url } from "@/lib/s3-url";
 import SiteSettingsForm from "@/components/admin/SiteSettingsForm";
 
 export default async function SiteSettingsPage() {
@@ -7,6 +8,13 @@ export default async function SiteSettingsPage() {
       id: "site-settings",
     },
   });
+
+  const heroImages = await Promise.all(
+    (settings?.heroImages ?? []).map(async (key) => ({
+      key,
+      url: await getS3Url(key),
+    }))
+  );
 
   return (
     <div className="px-6 py-8 lg:px-10 lg:py-10">
@@ -44,6 +52,7 @@ export default async function SiteSettingsPage() {
             instagramUrl: settings?.instagramUrl ?? "",
             tiktokUrl: settings?.tiktokUrl ?? "",
           }}
+          initialHeroImages={heroImages}
         />
       </div>
     </div>

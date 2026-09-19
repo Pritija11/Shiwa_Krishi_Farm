@@ -8,6 +8,9 @@ type ImageCropperProps = {
   onCropComplete: (croppedAreaPixels: Area) => void;
   onCancel: () => void;
   onConfirm: () => void;
+  aspect?: number;
+  title?: string;
+  description?: string;
 };
 
 export default function ImageCropper({
@@ -15,6 +18,9 @@ export default function ImageCropper({
   onCropComplete,
   onCancel,
   onConfirm,
+  aspect = 4 / 3,
+  title = "Crop Product Image",
+  description = "Adjust the image so the important part fits inside the frame.",
 }: ImageCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -32,11 +38,11 @@ export default function ImageCropper({
         {/* Header */}
         <div className="border-b border-stone-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-green-950">
-            Crop Product Image
+            {title}
           </h2>
 
           <p className="mt-1 text-xs text-stone-500">
-            Adjust the image so the important part fits inside the 4:3 frame.
+            {description}
           </p>
         </div>
 
@@ -46,7 +52,7 @@ export default function ImageCropper({
             image={image}
             crop={crop}
             zoom={zoom}
-            aspect={4 / 3}
+            aspect={aspect}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={handleCropComplete}

@@ -15,6 +15,11 @@ export const siteSettingsSchema = z.object({
   facebookUrl: z.string().trim().optional(),
   instagramUrl: z.string().trim().optional(),
   tiktokUrl: z.string().trim().optional(),
+
+  heroImages: z
+    .array(z.string().trim().min(1))
+    .min(1, "At least one hero image is required")
+    .max(5, "You can upload up to 5 hero images"),
 });
 
 export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;

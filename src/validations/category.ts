@@ -8,6 +8,7 @@ export const categorySchema = z.object({
     .trim()
     .optional()
     .or(z.literal("")),
+  imageUrl: z.string().trim().optional().nullable(),
 });
 
 export type CategoryInput = z.infer<typeof categorySchema>;
