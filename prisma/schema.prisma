@@ -112,7 +112,6 @@ model Category {
   name        String  @unique
   slug        String  @unique
   description String?
-  imageUrl    String?
 
   products Product[]
 
@@ -282,8 +281,6 @@ model SiteSettings {
   facebookUrl  String?
   instagramUrl String?
   tiktokUrl    String?
-
-  heroImages String[] @default([])
 
   updatedAt DateTime @updatedAt
 }

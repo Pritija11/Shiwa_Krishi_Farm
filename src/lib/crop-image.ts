@@ -1,27 +1,18 @@
 import type { Area } from "react-easy-crop";
 
-const DEFAULT_MAX_WIDTH = 1200;
-const DEFAULT_MAX_HEIGHT = 900;
+const MAX_WIDTH = 1200;
+const MAX_HEIGHT = 900;
 
 export async function createCroppedImage(
   imageSrc: string,
-  crop: Area,
-  options?: {
-    maxWidth?: number;
-    maxHeight?: number;
-    fileNamePrefix?: string;
-  }
+  crop: Area
 ): Promise<File> {
-  const maxWidth = options?.maxWidth ?? DEFAULT_MAX_WIDTH;
-  const maxHeight = options?.maxHeight ?? DEFAULT_MAX_HEIGHT;
-  const fileNamePrefix = options?.fileNamePrefix ?? "product-image";
-
   const image = await loadImage(imageSrc);
 
-  // Keep the exact crop ratio while limiting the output size.
+  // Keep the exact 4:3 ratio while limiting the output size.
   const scale = Math.min(
-    maxWidth / crop.width,
-    maxHeight / crop.height,
+    MAX_WIDTH / crop.width,
+    MAX_HEIGHT / crop.height,
     1
   );
 
@@ -58,7 +49,7 @@ export async function createCroppedImage(
 
   return new File(
     [blob],
-    `${fileNamePrefix}-${Date.now()}.jpg`,
+    `product-image-${Date.now()}.jpg`,
     {
       type: "image/jpeg",
     }

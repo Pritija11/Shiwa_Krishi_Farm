@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, slug, description, imageUrl } = result.data;
+    const { name, slug, description } = result.data;
 
     const existingCategory = await prisma.category.findFirst({
       where: {
@@ -84,7 +84,6 @@ export async function POST(request: Request) {
         name,
         slug,
         description: description || null,
-        imageUrl: imageUrl || null,
       },
     });
 

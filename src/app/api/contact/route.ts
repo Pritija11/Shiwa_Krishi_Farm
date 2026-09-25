@@ -2,29 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { contactSchema } from "@/validations/contact";
-import {
-  checkPublicFormRateLimit,
-  getClientIpFromRequest,
-} from "@/lib/public-form-rate-limit";
 
 // POST /api/contact
 export async function POST(request: Request) {
   try {
-    const ip = getClientIpFromRequest(request);
-    const rateLimit = checkPublicFormRateLimit(`${ip}:contact`, {
-      max: 5,
-      windowMs: 10 * 60 * 1000,
-    });
-
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        {
-          error: `Too many messages sent. Please try again in ${rateLimit.retryAfterMinutes} minute(s).`,
-        },
-        { status: 429 },
-      );
-    }
-
     const body = await request.json();
 
     const result = contactSchema.safeParse(body);
