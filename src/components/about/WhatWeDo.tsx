@@ -1,66 +1,30 @@
 import Image from "next/image";
 import Reveal from "@/components/ui/Reveal";
-import { prisma } from "@/lib/prisma";
-import { getS3Url } from "@/lib/s3-url";
 
-// Display copy for each known category slug. The section only ever shows
-// these four tiles; a category without a matching slug here is skipped.
-const ACTIVITY_DISPLAY: Record<
-  string,
-  { title: string; description: string; fallbackImage: string }
-> = {
-  poultry: {
+const farmActivities = [
+  {
     title: "Poultry & Eggs",
     description: "Fresh chicken and farm-raised eggs from our poultry.",
-    fallbackImage: "/images/poultry.jpg",
+    image: "/images/poultry.jpg",
   },
-  goats: {
+  {
     title: "Goats",
     description: "Healthy goats raised with care on our farm.",
-    fallbackImage: "/images/hero-goats.jpg",
+    image: "/images/hero-goats.jpg",
   },
-  dairy: {
+  {
     title: "Fresh Milk",
     description: "Fresh cow milk produced and collected from our farm.",
-    fallbackImage: "/images/hero-dairy.webp",
+    image: "/images/hero-dairy.webp",
   },
-  vegetables: {
+  {
     title: "Seasonal Vegetables",
     description: "Fresh vegetables grown according to the season.",
-    fallbackImage: "/images/hero-veggies.jpg",
+    image: "/images/hero-veggies.jpg",
   },
-};
+];
 
-const ACTIVITY_ORDER = ["poultry", "goats", "dairy", "vegetables"];
-
-async function getFarmActivities() {
-  const categories = await prisma.category.findMany({
-    where: { slug: { in: ACTIVITY_ORDER } },
-  });
-
-  const bySlug = new Map(categories.map((category) => [category.slug, category]));
-
-  return Promise.all(
-    ACTIVITY_ORDER.filter((slug) => ACTIVITY_DISPLAY[slug]).map(
-      async (slug) => {
-        const display = ACTIVITY_DISPLAY[slug];
-        const category = bySlug.get(slug);
-
-        return {
-          title: display.title,
-          description: display.description,
-          image: category?.imageUrl
-            ? await getS3Url(category.imageUrl)
-            : display.fallbackImage,
-        };
-      }
-    )
-  );
-}
-
-export default async function WhatWeDo() {
-  const farmActivities = await getFarmActivities();
-
+export default function WhatWeDo() {
   return (
     <section className="bg-[#E8EDE3] px-6 py-16 md:py-24">
       <div className="mx-auto max-w-7xl">

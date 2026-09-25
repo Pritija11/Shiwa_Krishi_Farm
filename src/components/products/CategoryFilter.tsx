@@ -61,7 +61,7 @@ export default function CategoryFilter({
           <button
             type="button"
             onClick={() => updateParams({ category: null })}
-            className={`shrink-0 cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium transition ${
+            className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition ${
               !selectedCategory
                 ? "bg-green-900 text-white"
                 : "border border-green-900/20 text-green-900 hover:bg-green-900/5"
@@ -78,7 +78,7 @@ export default function CategoryFilter({
                 key={category.id}
                 type="button"
                 onClick={() => updateParams({ category: category.slug })}
-                className={`shrink-0 cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium transition ${
+                className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition ${
                   isSelected
                     ? "bg-green-900 text-white"
                     : "border border-green-900/20 text-green-900 hover:bg-green-900/5"

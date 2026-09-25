@@ -208,7 +208,7 @@ export default function EditGalleryForm({
 
           <p className="mt-2 text-xs text-stone-400">
             Images: JPG, PNG, WEBP up to 5MB. Videos: MP4, WEBM up to
-            100MB (roughly 30-45 seconds at normal phone quality).
+            50MB.
           </p>
         </div>
 

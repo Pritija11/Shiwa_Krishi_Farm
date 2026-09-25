@@ -30,7 +30,7 @@ export default function Navbar() {
   return (
     <header className="fixed left-0 top-5 z-50 w-full px-4">
       <nav
-        className={`mx-auto max-w-6xl bg-white/95 shadow-lg backdrop-blur-sm ${
+        className={`mx-auto max-w-6xl bg-white/95 shadow-lg backdrop-blur-sm transition-[border-radius] duration-200 ${
           isOpen ? "rounded-[2rem]" : "rounded-full"
         }`}
       >
@@ -56,7 +56,7 @@ export default function Navbar() {
             </span>
           </Link>
           {/* Desktop Navigation */}
-          <div className="hidden items-center gap-6 lg:flex">
+          <div className="hidden items-center gap-7 md:flex">
             {navLinks.map((link) => {
               const active = isLinkActive(pathname, link.href);
 
@@ -80,7 +80,7 @@ export default function Navbar() {
           {/* Desktop Order Button */}
           <Link
             href="/order"
-            className="hidden rounded-full bg-green-700 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 lg:block"
+            className="hidden rounded-full bg-green-700 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 md:block"
           >
             Order Now
           </Link>
@@ -89,7 +89,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}
-            className="rounded-full p-2 text-green-800 transition-colors hover:bg-green-50 lg:hidden"
+            className="rounded-full p-2 text-green-800 transition-colors hover:bg-green-50 md:hidden"
             aria-label={isOpen ? "Close menu" : "Open menu"}
             aria-expanded={isOpen}
           >
@@ -99,7 +99,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="border-t border-gray-100 px-5 pb-5 pt-3 lg:hidden">
+          <div className="border-t border-gray-100 px-5 pb-5 pt-3 md:hidden">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => {
                 const active = isLinkActive(pathname, link.href);

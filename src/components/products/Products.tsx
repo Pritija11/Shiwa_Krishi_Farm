@@ -6,6 +6,8 @@ import Reveal from "@/components/ui/Reveal";
 
 const FEATURED_COUNT = 4;
 
+const categories = ["All", "Dairy", "Vegetables", "Poultry", "Goats"];
+
 function formatAvailability(
   availability: "IN_STOCK" | "SEASONAL" | "OUT_OF_STOCK"
 ) {
@@ -86,19 +88,8 @@ async function getHomepageProducts() {
   );
 }
 
-async function getCategories() {
-  return prisma.category.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-}
-
 export default async function Products() {
-  const [products, categories] = await Promise.all([
-    getHomepageProducts(),
-    getCategories(),
-  ]);
+  const products = await getHomepageProducts();
 
   return (
     <section className="relative overflow-hidden bg-[#F8F5ED] px-6 py-16 md:py-24">
@@ -134,21 +125,17 @@ export default async function Products() {
 
         {/* Category Navigation */}
         <div className="mt-10 flex flex-wrap justify-center gap-2">
-          <Link
-            href="/products"
-            className="rounded-full border border-green-800 bg-green-800 px-5 py-2.5 text-sm font-medium text-white transition-all duration-300"
-          >
-            All Products
-          </Link>
-
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/products?category=${category.slug}`}
-              className="rounded-full border border-stone-300 bg-white/60 px-5 py-2.5 text-sm font-medium text-green-900 transition-all duration-300 hover:border-green-700 hover:bg-green-50"
+          {categories.map((category, index) => (
+            <button
+              key={category}
+              className={`rounded-full border px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
+                index === 0
+                  ? "border-green-800 bg-green-800 text-white"
+                  : "border-stone-300 bg-white/60 text-green-900 hover:border-green-700 hover:bg-green-50"
+              }`}
             >
-              {category.name}
-            </Link>
+              {category}
+            </button>
           ))}
         </div>
 

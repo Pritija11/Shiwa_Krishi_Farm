@@ -1,7 +1,7 @@
 export type MediaType = "IMAGE" | "VIDEO";
 
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-export const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
+export const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
 
 export function getMediaTypeFromFile(file: File): MediaType | null {
   if (file.type.startsWith("image/")) {
@@ -27,7 +27,7 @@ export function validateGalleryMediaFile(file: File): string | null {
   }
 
   if (mediaType === "VIDEO" && file.size > MAX_VIDEO_SIZE) {
-    return "Video must be smaller than 100MB.";
+    return "Video must be smaller than 50MB.";
   }
 
   return null;

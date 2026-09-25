@@ -62,7 +62,6 @@ export async function PUT(request: Request) {
       facebookUrl,
       instagramUrl,
       tiktokUrl,
-      heroImages,
     } = result.data;
 
     const data = {
@@ -79,7 +78,6 @@ export async function PUT(request: Request) {
       facebookUrl: facebookUrl || null,
       instagramUrl: instagramUrl || null,
       tiktokUrl: tiktokUrl || null,
-      heroImages,
     };
 
     const settings = await prisma.siteSettings.upsert({
