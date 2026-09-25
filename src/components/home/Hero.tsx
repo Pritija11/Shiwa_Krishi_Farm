@@ -4,14 +4,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const heroImages = [
+// Used until an admin configures hero images in Site Settings.
+const FALLBACK_HERO_IMAGES = [
   "/images/farm-hero-image.jpg",
   "/images/hero-goats.jpg",
   "/images/hero-veggies.jpg",
   "/images/hero-dairy.webp",
 ];
 
-export default function Hero() {
+type HeroProps = {
+  images?: string[];
+};
+
+export default function Hero({ images }: HeroProps) {
+  const heroImages =
+    images && images.length > 0 ? images : FALLBACK_HERO_IMAGES;
+
   const [currentImage, setCurrentImage] = useState(0);
 
   useEffect(() => {
@@ -20,7 +28,7 @@ export default function Hero() {
     }, 6000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [heroImages.length]);
 
   return (
     <section className="relative min-h-screen overflow-hidden">

@@ -1,35 +1,69 @@
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/ui/Reveal";
+import { prisma } from "@/lib/prisma";
+import { getS3Url } from "@/lib/s3-url";
 
-const categories = [
-  {
+// Display copy for each known category slug. The section only ever shows
+// these four tiles; a category without a matching slug here is skipped.
+const CATEGORY_DISPLAY: Record<
+  string,
+  { name: string; description: string; fallbackImage: string }
+> = {
+  vegetables: {
     name: "Fresh Vegetables",
     description: "Seasonal produce grown fresh on our farm.",
-    image: "/images/hero-veggies.jpg",
-    href: "/products?category=vegetables",
+    fallbackImage: "/images/hero-veggies.jpg",
   },
-  {
+  dairy: {
     name: "Fresh Dairy",
     description: "Fresh, wholesome milk from our farm.",
-    image: "/images/hero-dairy.webp",
-    href: "/products?category=dairy",
+    fallbackImage: "/images/hero-dairy.webp",
   },
-  {
+  poultry: {
     name: "Poultry",
     description: "Quality farm-raised poultry products.",
-    image: "/images/poultry.jpg",
-    href: "/products?category=poultry",
+    fallbackImage: "/images/poultry.jpg",
   },
-  {
+  goats: {
     name: "Goats",
     description: "Farm-raised goat meat, carefully sourced and prepared.",
-    image: "/images/hero-goats.jpg",
-    href: "/products?category=goats",
+    fallbackImage: "/images/hero-goats.jpg",
   },
-];
+};
 
-export default function ProductCategories() {
+const CATEGORY_ORDER = ["vegetables", "dairy", "poultry", "goats"];
+
+async function getCategoryTiles() {
+  const categories = await prisma.category.findMany({
+    where: { slug: { in: CATEGORY_ORDER } },
+  });
+
+  const bySlug = new Map(categories.map((category) => [category.slug, category]));
+
+  return Promise.all(
+    CATEGORY_ORDER.filter((slug) => CATEGORY_DISPLAY[slug]).map(
+      async (slug) => {
+        const display = CATEGORY_DISPLAY[slug];
+        const category = bySlug.get(slug);
+
+        return {
+          slug,
+          name: display.name,
+          description: display.description,
+          href: `/products?category=${slug}`,
+          image: category?.imageUrl
+            ? await getS3Url(category.imageUrl)
+            : display.fallbackImage,
+        };
+      }
+    )
+  );
+}
+
+export default async function ProductCategories() {
+  const categories = await getCategoryTiles();
+
   return (
     <section className="bg-[#F8F5ED] px-6 py-16 md:py-24">
       <div className="mx-auto max-w-7xl">

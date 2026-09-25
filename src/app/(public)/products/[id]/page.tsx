@@ -282,14 +282,14 @@ export default async function ProductDetailPage({
 
               {/* Trust Points */}
               <div className="mt-12 rounded-3xl border border-stone-200 bg-white/50 px-6 py-6 sm:px-8">
-                <div className="grid grid-cols-1 divide-y divide-stone-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                <div className="grid grid-cols-1 divide-y divide-stone-200 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
                   {trustPoints.map((point) => {
                     const Icon = point.icon;
 
                     return (
                       <div
                         key={point.title}
-                        className="flex items-start gap-3 py-4 first:pt-0 last:pb-0 sm:px-6 sm:py-0 sm:first:pl-0 sm:last:pr-0"
+                        className="flex items-start gap-3 py-4 first:pt-0 last:pb-0 lg:px-6 lg:py-0 lg:first:pl-0 lg:last:pr-0"
                       >
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EEF1E7] text-green-800">
                           <Icon size={15} strokeWidth={1.8} />
