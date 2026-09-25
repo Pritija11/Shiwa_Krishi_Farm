@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { getS3Url } from "@/lib/s3-url";
 import CategoryForm from "@/components/admin/CategoryForm";
 
 type EditCategoryPageProps = {
@@ -23,6 +24,10 @@ export default async function EditCategoryPage({
   if (!category) {
     notFound();
   }
+
+  const currentImageUrl = category.imageUrl
+    ? await getS3Url(category.imageUrl)
+    : undefined;
 
   return (
     <div className="px-6 py-8 lg:px-10 lg:py-10">
@@ -48,7 +53,9 @@ export default async function EditCategoryPage({
           name: category.name,
           slug: category.slug,
           description: category.description ?? "",
+          imageUrl: category.imageUrl ?? "",
         }}
+        currentImageUrl={currentImageUrl}
       />
     </div>
   );
